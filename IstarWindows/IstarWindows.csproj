@@ -146,20 +146,13 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Code\BingImage.cs" />
-    <Compile Include="Code\BooleanToFontWeightConverter.cs" />
-    <Compile Include="Code\BooleanToVisibilityConverter.cs" />
     <Compile Include="Code\DateConverter.cs" />
     <Compile Include="Code\FixedWidthColumn.cs" />
     <Compile Include="Code\FlickrImageLoader.cs" />
     <Compile Include="Code\ImageConverter.cs" />
-    <Compile Include="Code\NullableConverter.cs" />
-    <Compile Include="Code\NullOrEmptyStringToVisibilityConverter.cs" />
-    <Compile Include="Code\NullToVisibilityConverter.cs" />
     <Compile Include="Code\PasswordDecryptor.cs" />
     <Compile Include="Code\SortBehavior.cs" />
     <Compile Include="Code\SpeechConverter.cs" />
-    <Compile Include="Code\ToLowerConverter.cs" />
-    <Compile Include="Code\ToUpperConverter.cs" />
     <Compile Include="Code\UIHelper.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
