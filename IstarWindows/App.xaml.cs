@@ -1,8 +1,12 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Timers;
 using System.Windows;
 using Istar.ModernUI.Presentation;
 using Istar.ModernUI.Windows.Controls;
+using IstarWindows.Models;
+using IstarWindows.ViewModels;
+using IstarWindows.Views;
 
 namespace IstarWindows
 {
