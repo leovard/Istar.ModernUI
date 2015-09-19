@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Istar.ModernUI.Windows.Controls.BBCode
+namespace Istar.ModernUI.Windows.Controls.BbCode
 {
     /// <summary>
     /// Represents a token buffer.
     /// </summary>
     internal class TokenBuffer
     {
-        private List<Token> tokens = new List<Token>();
-        private int position;
+        private readonly List<Token> _tokens = new List<Token>();
+        private int _position;
         //private int mark;
 
         /// <summary>
@@ -19,13 +19,13 @@ namespace Istar.ModernUI.Windows.Controls.BBCode
         public TokenBuffer(Lexer lexer)
         {
             if (lexer == null) {
-                throw new ArgumentNullException("lexer");
+                throw new ArgumentNullException(nameof(lexer));
             }
 
             Token token;
             do {
                 token = lexer.NextToken();
-                this.tokens.Add(token);
+                _tokens.Add(token);
             }
             while (token.TokenType != Lexer.TokenEnd);
         }
@@ -35,47 +35,18 @@ namespace Istar.ModernUI.Windows.Controls.BBCode
         /// </summary>
         /// <param name="count">The number of tokens to look ahead.</param>
         /// <returns></returns>
-        public Token LA(int count)
+        public Token La(int count)
         {
-            int index = this.position + count - 1;
-            if (index < this.tokens.Count) {
-                return this.tokens[index];
-            }
-
-            return Token.End;
+            var index = _position + count - 1;
+            return index < _tokens.Count ? _tokens[index] : Token.End;
         }
-
-        ///// <summary>
-        ///// Marks the current position.
-        ///// </summary>
-        //public void Mark()
-        //{
-        //    this.mark = this.position;
-        //}
-
-        ///// <summary>
-        ///// Gets the mark.
-        ///// </summary>
-        ///// <returns></returns>
-        //public Token[] GetMark()
-        //{
-        //    if (this.mark < this.position) {
-        //        Token[] result = new Token[this.position - this.mark];
-        //        for (int i = this.mark; i < this.position; i++) {
-        //            result[i - this.mark] = this.tokens[i];
-        //        }
-
-        //        return result;
-        //    }
-        //    return new Token[0];
-        //}
 
         /// <summary>
         /// Consumes the next token.
         /// </summary>
         public void Consume()
         {
-            this.position++;
+            _position++;
         }
     }
 }

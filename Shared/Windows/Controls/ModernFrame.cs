@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -61,49 +60,49 @@ namespace Istar.ModernUI.Windows.Controls
         /// </summary>
         public event EventHandler<NavigationFailedEventArgs> NavigationFailed;
 
-        private Stack<Uri> history = new Stack<Uri>();
-        private Dictionary<Uri, object> contentCache = new Dictionary<Uri, object>();
+        private readonly Stack<Uri> _history = new Stack<Uri>();
+        private readonly Dictionary<Uri, object> _contentCache = new Dictionary<Uri, object>();
 #if NET4
         private List<WeakReference> childFrames = new List<WeakReference>();        // list of registered frames in sub tree
 #else
-        private List<WeakReference<ModernFrame>> childFrames = new List<WeakReference<ModernFrame>>();        // list of registered frames in sub tree
+        private readonly List<WeakReference<ModernFrame>> _childFrames = new List<WeakReference<ModernFrame>>();        // list of registered frames in sub tree
 #endif
-        private CancellationTokenSource tokenSource;
-        private bool isNavigatingHistory;
-        private bool isResetSource;
+        private CancellationTokenSource _tokenSource;
+        private bool _isNavigatingHistory;
+        private bool _isResetSource;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ModernFrame"/> class.
         /// </summary>
         public ModernFrame()
         {
-            this.DefaultStyleKey = typeof(ModernFrame);
+            DefaultStyleKey = typeof(ModernFrame);
 
             // associate application and navigation commands with this instance
-            this.CommandBindings.Add(new CommandBinding(NavigationCommands.BrowseBack, OnBrowseBack, OnCanBrowseBack));
-            this.CommandBindings.Add(new CommandBinding(NavigationCommands.GoToPage, OnGoToPage, OnCanGoToPage));
+            CommandBindings.Add(new CommandBinding(NavigationCommands.BrowseBack, OnBrowseBack, OnCanBrowseBack));
+            CommandBindings.Add(new CommandBinding(NavigationCommands.GoToPage, OnGoToPage, OnCanGoToPage));
             //this.CommandBindings.Add(new CommandBinding(NavigationCommands.Refresh, OnRefresh, OnCanRefresh));
             //this.CommandBindings.Add(new CommandBinding(ApplicationCommands.Copy, OnCopy, OnCanCopy));
 
-            this.Loaded += OnLoaded;
+            Loaded += OnLoaded;
         }
 
         private static void OnKeepContentAliveChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
         {
-            ((ModernFrame)o).OnKeepContentAliveChanged((bool)e.NewValue);
+            ((ModernFrame)o).OnKeepContentAliveChanged();
         }
 
-        private void OnKeepContentAliveChanged(bool keepAlive)
+        private void OnKeepContentAliveChanged()
         {
             // clear content cache
-            this.contentCache.Clear();
+            _contentCache.Clear();
         }
 
         private static void OnContentLoaderChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
         {
             if (e.NewValue == null) {
                 // null values for content loader not allowed
-                throw new ArgumentNullException("ContentLoader");
+                throw new ArgumentNullException(nameof(o));
             }
         }
 
@@ -115,12 +114,12 @@ namespace Istar.ModernUI.Windows.Controls
         private void OnSourceChanged(Uri oldValue, Uri newValue)
         {
             // if resetting source or old source equals new, don't do anything
-            if (this.isResetSource || newValue != null && newValue.Equals(oldValue)) {
+            if (_isResetSource || newValue != null && newValue.Equals(oldValue)) {
                 return;
             }
 
             // handle fragment navigation
-            string newFragment = null;
+            string newFragment;
             var oldValueNoFragment = NavigationHelper.RemoveFragment(oldValue);
             var newValueNoFragment = NavigationHelper.RemoveFragment(newValue, out newFragment);
 
@@ -130,13 +129,13 @@ namespace Istar.ModernUI.Windows.Controls
                     Fragment = newFragment
                 };
 
-                OnFragmentNavigation(this.Content as IContent, args);
+                OnFragmentNavigation(Content as IContent, args);
             }
             else {
-                var navType = this.isNavigatingHistory ? NavigationType.Back : NavigationType.New;
+                var navType = _isNavigatingHistory ? NavigationType.Back : NavigationType.New;
 
                 // only invoke CanNavigate for new navigation
-                if (!this.isNavigatingHistory && !CanNavigate(oldValue, newValue, navType)) {
+                if (!_isNavigatingHistory && !CanNavigate(oldValue, newValue, navType)) {
                     return;
                 }
 
@@ -153,18 +152,18 @@ namespace Istar.ModernUI.Windows.Controls
                 NavigationType = navigationType,
                 Cancel = false,
             };
-            OnNavigating(this.Content as IContent, cancelArgs);
+            OnNavigating(Content as IContent, cancelArgs);
 
             // check if navigation cancelled
             if (cancelArgs.Cancel) {
                 Debug.WriteLine("Cancelled navigation from '{0}' to '{1}'", oldValue, newValue);
 
-                if (this.Source != oldValue) {
+                if (Source != oldValue) {
                     // enqueue the operation to reset the source back to the old value
                     Dispatcher.BeginInvoke((Action)(() => {
-                        this.isResetSource = true;
+                        _isResetSource = true;
                         SetCurrentValue(SourceProperty, oldValue);
-                        this.isResetSource = false;
+                        _isResetSource = false;
                     }));
                 }
                 return false;
@@ -182,14 +181,14 @@ namespace Istar.ModernUI.Windows.Controls
 
             // cancel previous load content task (if any)
             // note: no need for thread synchronization, this code always executes on the UI thread
-            if (this.tokenSource != null) {
-                this.tokenSource.Cancel();
-                this.tokenSource = null;
+            if (_tokenSource != null) {
+                _tokenSource.Cancel();
+                _tokenSource = null;
             }
 
             // push previous source onto the history stack (only for new navigation types)
             if (oldValue != null && navigationType == NavigationType.New) {
-                this.history.Push(oldValue);
+                _history.Push(oldValue);
             }
 
             object newContent = null;
@@ -198,12 +197,12 @@ namespace Istar.ModernUI.Windows.Controls
                 // content is cached on uri without fragment
                 var newValueNoFragment = NavigationHelper.RemoveFragment(newValue);
 
-                if (navigationType == NavigationType.Refresh || !this.contentCache.TryGetValue(newValueNoFragment, out newContent)) {
+                if (navigationType == NavigationType.Refresh || !_contentCache.TryGetValue(newValueNoFragment, out newContent)) {
                     var localTokenSource = new CancellationTokenSource();
-                    this.tokenSource = localTokenSource;
+                    _tokenSource = localTokenSource;
                     // load the content (asynchronous!)
                     var scheduler = TaskScheduler.FromCurrentSynchronizationContext();
-                    var task = this.ContentLoader.LoadContentAsync(newValue, this.tokenSource.Token);
+                    var task = ContentLoader.LoadContentAsync(newValue, _tokenSource.Token);
 
                     task.ContinueWith(t => {
                         try {
@@ -215,7 +214,7 @@ namespace Istar.ModernUI.Windows.Controls
                                 var failedArgs = new NavigationFailedEventArgs {
                                     Frame = this,
                                     Source = newValue,
-                                    Error = t.Exception.InnerException,
+                                    Error = t.Exception?.InnerException,
                                     Handled = false
                                 };
 
@@ -230,7 +229,7 @@ namespace Istar.ModernUI.Windows.Controls
                                 newContent = t.Result;
                                 if (ShouldKeepContentAlive(newContent)) {
                                     // keep the new content in memory
-                                    this.contentCache[newValueNoFragment] = newContent;
+                                    _contentCache[newValueNoFragment] = newContent;
                                 }
 
                                 SetContent(newValue, navigationType, newContent, false);
@@ -238,8 +237,8 @@ namespace Istar.ModernUI.Windows.Controls
                         }
                         finally {
                             // clear global tokenSource to avoid a Cancel on a disposed object
-                            if (this.tokenSource == localTokenSource) {
-                                this.tokenSource = null;
+                            if (_tokenSource == localTokenSource) {
+                                _tokenSource = null;
                             }
 
                             // and dispose of the local tokensource
@@ -256,10 +255,10 @@ namespace Istar.ModernUI.Windows.Controls
 
         private void SetContent(Uri newSource, NavigationType navigationType, object newContent, bool contentIsError)
         {
-            var oldContent = this.Content as IContent;
+            var oldContent = Content as IContent;
 
             // assign content
-            this.Content = newContent;
+            Content = newContent;
 
             // do not raise navigated event when error
             if (!contentIsError) {
@@ -294,26 +293,20 @@ namespace Istar.ModernUI.Windows.Controls
 
         private IEnumerable<ModernFrame> GetChildFrames()
         {
-            var refs = this.childFrames.ToArray();
+            var refs = _childFrames.ToArray();
             foreach (var r in refs) {
                 var valid = false;
                 ModernFrame frame;
-
-#if NET4
-                if (r.IsAlive) {
-                    frame = (ModernFrame)r.Target;
-#else
                 if (r.TryGetTarget(out frame)) {
-#endif
                     // check if frame is still an actual child (not the case when child is removed, but not yet garbage collected)
-                    if (NavigationHelper.FindFrame(null, frame) == this) {
+                    if (Equals(NavigationHelper.FindFrame(null, frame), this)) {
                         valid = true;
                         yield return frame;
                     }
                 }
 
                 if (!valid) {
-                    this.childFrames.Remove(r);
+                    _childFrames.Remove(r);
                 }
             }
         }
@@ -321,14 +314,10 @@ namespace Istar.ModernUI.Windows.Controls
         private void OnFragmentNavigation(IContent content, FragmentNavigationEventArgs e)
         {
             // invoke optional IContent.OnFragmentNavigation
-            if (content != null) {
-                content.OnFragmentNavigation(e);
-            }
+            content?.OnFragmentNavigation(e);
 
             // raise the FragmentNavigation event
-            if (FragmentNavigation != null) {
-                FragmentNavigation(this, e);
-            }
+            FragmentNavigation?.Invoke(this, e);
         }
 
         private void OnNavigating(IContent content, NavigatingCancelEventArgs e)
@@ -338,40 +327,28 @@ namespace Istar.ModernUI.Windows.Controls
                 f.OnNavigating(f.Content as IContent, e);
             }
 
-            e.IsParentFrameNavigating = e.Frame != this;
+            e.IsParentFrameNavigating = !Equals(e.Frame, this);
 
             // invoke IContent.OnNavigating (only if content implements IContent)
-            if (content != null) {
-                content.OnNavigatingFrom(e);
-            }
+            content?.OnNavigatingFrom(e);
 
             // raise the Navigating event
-            if (Navigating != null) {
-                Navigating(this, e);
-            }
+            Navigating?.Invoke(this, e);
         }
 
         private void OnNavigated(IContent oldContent, IContent newContent, NavigationEventArgs e)
         {
             // invoke IContent.OnNavigatedFrom and OnNavigatedTo
-            if (oldContent != null) {
-                oldContent.OnNavigatedFrom(e);
-            }
-            if (newContent != null) {
-                newContent.OnNavigatedTo(e);
-            }
+            oldContent?.OnNavigatedFrom(e);
+            newContent?.OnNavigatedTo(e);
 
             // raise the Navigated event
-            if (Navigated != null) {
-                Navigated(this, e);
-            }
+            Navigated?.Invoke(this, e);
         }
 
         private void OnNavigationFailed(NavigationFailedEventArgs e)
         {
-            if (NavigationFailed != null){
-                NavigationFailed(this, e);
-            }
+            NavigationFailed?.Invoke(this, e);
         }
 
         /// <summary>
@@ -380,28 +357,21 @@ namespace Istar.ModernUI.Windows.Controls
         /// <param name="args"></param>
         /// <returns></returns>
         /// <remarks>This method prevents parent frames from handling routed commands.</remarks>
-        private bool HandleRoutedEvent(CanExecuteRoutedEventArgs args)
+        private bool HandleRoutedEvent(RoutedEventArgs args)
         {
             var originalSource = args.OriginalSource as DependencyObject;
 
             if (originalSource == null) {
                 return false;
             }
-            return originalSource.AncestorsAndSelf().OfType<ModernFrame>().FirstOrDefault() == this;
+            return Equals(originalSource.AncestorsAndSelf().OfType<ModernFrame>().FirstOrDefault(), this);
         }
 
         private void OnCanBrowseBack(object sender, CanExecuteRoutedEventArgs e)
         {
             // only enable browse back for source frame, do not bubble
             if (HandleRoutedEvent(e)) {
-                e.CanExecute = this.history.Count > 0;
-            }
-        }
-
-        private void OnCanCopy(object sender, CanExecuteRoutedEventArgs e)
-        {
-            if (HandleRoutedEvent(e)) {
-                e.CanExecute = this.Content != null;
+                e.CanExecute = _history.Count > 0;
             }
         }
 
@@ -412,25 +382,16 @@ namespace Istar.ModernUI.Windows.Controls
             }
         }
 
-        private void OnCanRefresh(object sender, CanExecuteRoutedEventArgs e)
-        {
-            if (HandleRoutedEvent(e)) {
-                e.CanExecute = this.Source != null;
-            }
-        }
-
         private void OnBrowseBack(object target, ExecutedRoutedEventArgs e)
         {
-            if (this.history.Count > 0) {
-                var oldValue = this.Source;
-                var newValue = this.history.Peek();     // do not remove just yet, navigation may be cancelled
+            if (_history.Count <= 0) return;
+            var oldValue = Source;
+            var newValue = _history.Peek();     // do not remove just yet, navigation may be cancelled
 
-                if (CanNavigate(oldValue, newValue, NavigationType.Back)) {
-                    this.isNavigatingHistory = true;
-                    SetCurrentValue(SourceProperty, this.history.Pop());
-                    this.isNavigatingHistory = false;
-                }
-            }
+            if (!CanNavigate(oldValue, newValue, NavigationType.Back)) return;
+            _isNavigatingHistory = true;
+            SetCurrentValue(SourceProperty, _history.Pop());
+            _isNavigatingHistory = false;
         }
 
         private void OnGoToPage(object target, ExecutedRoutedEventArgs e)
@@ -439,38 +400,18 @@ namespace Istar.ModernUI.Windows.Controls
             SetCurrentValue(SourceProperty, newValue);
         }
 
-        private void OnRefresh(object target, ExecutedRoutedEventArgs e)
-        {
-            if (CanNavigate(this.Source, this.Source, NavigationType.Refresh)) {
-                Navigate(this.Source, this.Source, NavigationType.Refresh);
-            }
-        }
-
-        private void OnCopy(object target, ExecutedRoutedEventArgs e)
-        {
-            // copies the string representation of the current content to the clipboard
-            Clipboard.SetText(this.Content.ToString());
-        }
-
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
             var parent = NavigationHelper.FindFrame(NavigationHelper.FrameParent, this);
-            if (parent != null) {
-                parent.RegisterChildFrame(this);
-            }
+            parent?.RegisterChildFrame(this);
         }
 
         private void RegisterChildFrame(ModernFrame frame)
         {
             // do not register existing frame
-            if (!GetChildFrames().Contains(frame)) {
-#if NET4
-                var r = new WeakReference(frame);
-#else
-                var r = new WeakReference<ModernFrame>(frame);
-#endif
-                this.childFrames.Add(r);
-            }
+            if (GetChildFrames().Contains(frame)) return;
+            var r = new WeakReference<ModernFrame>(frame);
+            _childFrames.Add(r);
         }
 
         /// <summary>
@@ -490,7 +431,7 @@ namespace Istar.ModernUI.Windows.Controls
                 }
             }
             // otherwise let the ModernFrame decide
-            return this.KeepContentAlive;
+            return KeepContentAlive;
         }
 
         /// <summary>
@@ -501,7 +442,7 @@ namespace Istar.ModernUI.Windows.Controls
         public static bool? GetKeepAlive(DependencyObject o)
         {
             if (o == null) {
-                throw new ArgumentNullException("o");
+                throw new ArgumentNullException(nameof(o));
             }
             return (bool?)o.GetValue(KeepAliveProperty);
         }
@@ -514,7 +455,7 @@ namespace Istar.ModernUI.Windows.Controls
         public static void SetKeepAlive(DependencyObject o, bool? value)
         {
             if (o == null) {
-                throw new ArgumentNullException("o");
+                throw new ArgumentNullException(nameof(o));
             }
             o.SetValue(KeepAliveProperty, value);
         }
@@ -540,10 +481,7 @@ namespace Istar.ModernUI.Windows.Controls
         /// <summary>
         /// Gets a value indicating whether this instance is currently loading content.
         /// </summary>
-        public bool IsLoadingContent
-        {
-            get { return (bool)GetValue(IsLoadingContentProperty); }
-        }
+        public bool IsLoadingContent => (bool)GetValue(IsLoadingContentProperty);
 
         /// <summary>
         /// Gets or sets the source of the current content.

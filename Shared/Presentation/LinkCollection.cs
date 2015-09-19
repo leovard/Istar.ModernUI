@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
 
 namespace Istar.ModernUI.Presentation
 {
@@ -28,7 +24,7 @@ namespace Istar.ModernUI.Presentation
         public LinkCollection(IEnumerable<Link> links)
         {
             if (links == null) {
-                throw new ArgumentNullException("links");
+                throw new ArgumentNullException(nameof(links));
             }
             foreach (var link in links) {
                 Add(link);

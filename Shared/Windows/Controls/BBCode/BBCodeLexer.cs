@@ -1,16 +1,14 @@
-﻿using System;
-
-namespace Istar.ModernUI.Windows.Controls.BBCode
+﻿namespace Istar.ModernUI.Windows.Controls.BbCode
 {
     /// <summary>
-    /// The BBCode lexer.
+    /// The BbCode lexer.
     /// </summary>
-    internal class BBCodeLexer
+    internal class BbCodeLexer
         : Lexer
     {
-        private static readonly char[] QuoteChars = new char[] { '\'', '"' };
-        private static readonly char[] WhitespaceChars = new char[] { ' ', '\t' };
-        private static readonly char[] NewlineChars = new char[] { '\r', '\n' };
+        private static readonly char[] QuoteChars = new[] { '\'', '"' };
+        private static readonly char[] WhitespaceChars = new[] { ' ', '\t' };
+        private static readonly char[] NewlineChars = new[] { '\r', '\n' };
 
         /// <summary>
         /// Start tag
@@ -43,17 +41,17 @@ namespace Istar.ModernUI.Windows.Controls.BBCode
         public const int StateTag = 1;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:BBCodeLexer"/> class.
+        /// Initializes a new instance of the <see cref="T:BbCodeLexer"/> class.
         /// </summary>
         /// <param name="value">The value.</param>
-        public BBCodeLexer(string value)
+        public BbCodeLexer(string value)
             : base(value)
         {
         }
 
         private bool IsTagNameChar()
         {
-            return IsInRange('A', 'Z') || IsInRange('a', 'z') || IsInRange(new char[] { '*' });
+            return IsInRange('A', 'Z') || IsInRange('a', 'z') || IsInRange(new[] { '*' });
         }
 
         private Token OpenTag()
@@ -76,7 +74,7 @@ namespace Istar.ModernUI.Windows.Controls.BBCode
             while (IsTagNameChar()) {
                 Consume();
             }
-            Token token = new Token(GetMark(), TokenEndTag);
+            var token = new Token(GetMark(), TokenEndTag);
             Match(']');
 
             return token;
@@ -93,7 +91,7 @@ namespace Istar.ModernUI.Windows.Controls.BBCode
         private Token Text()
         {
             Mark();
-            while (LA(1) != '[' && LA(1) != char.MaxValue && !IsInRange(NewlineChars)) {
+            while (La(1) != '[' && La(1) != char.MaxValue && !IsInRange(NewlineChars)) {
                 Consume();
             }
             return new Token(GetMark(), TokenText);
@@ -119,7 +117,7 @@ namespace Istar.ModernUI.Windows.Controls.BBCode
             }
             else {
                 Mark();
-                while (!IsInRange(WhitespaceChars) && LA(1) != ']' && LA(1) != char.MaxValue) {
+                while (!IsInRange(WhitespaceChars) && La(1) != ']' && La(1) != char.MaxValue) {
                     Consume();
                 }
 
@@ -136,10 +134,7 @@ namespace Istar.ModernUI.Windows.Controls.BBCode
         /// Gets the default state of the lexer.
         /// </summary>
         /// <value>The state of the default.</value>
-        protected override int DefaultState
-        {
-            get { return StateNormal; }
-        }
+        protected override int DefaultState => StateNormal;
 
         /// <summary>
         /// Gets the next token.
@@ -147,40 +142,26 @@ namespace Istar.ModernUI.Windows.Controls.BBCode
         /// <returns></returns>
         public override Token NextToken()
         {
-            if (LA(1) == char.MaxValue) {
+            if (La(1) == char.MaxValue) {
                 return Token.End;
             }
 
-            if (State == StateNormal) {
-                if (LA(1) == '[') {
-                    if (LA(2) == '/') {
-                        return CloseTag();
-                    }
-                    else {
-                        Token token = OpenTag();
-                        PushState(StateTag);
-                        return token;
-                    }
-                }
-                else if (IsInRange(NewlineChars)) {
-                    return Newline();
-                }
-                else {
-                    return Text();
-                }
+            if (State != StateNormal)
+            {
+                if (State != StateTag) throw new ParseException("Invalid state");
+                if (La(1) != ']') return Attribute();
+                Consume();
+                PopState();
+                return NextToken();
             }
-            else if (State == StateTag) {
-                if (LA(1) == ']') {
-                    Consume();
-                    PopState();
-                    return NextToken();
-                }
-
-                return Attribute();
+            if (La(1) != '[') return IsInRange(NewlineChars) ? Newline() : Text();
+            if (La(2) == '/')
+            {
+                return CloseTag();
             }
-            else {
-                throw new ParseException("Invalid state");
-            }
+            var token = OpenTag();
+            PushState(StateTag);
+            return token;
         }
     }
 }

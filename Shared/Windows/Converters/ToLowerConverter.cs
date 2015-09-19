@@ -23,13 +23,10 @@ namespace Istar.ModernUI.Windows.Converters
         [SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase")]
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            if (value != null) {
-                var strValue = value.ToString();
+            var strValue = value?.ToString();
 
                 
-                return strValue.ToLowerInvariant();
-            }
-            return null;
+            return strValue?.ToLowerInvariant();
         }
 
         /// <summary>

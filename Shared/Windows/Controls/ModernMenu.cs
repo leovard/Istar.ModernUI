@@ -3,8 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -44,15 +42,15 @@ namespace Istar.ModernUI.Windows.Controls
         /// </summary>
         public event EventHandler<SourceEventArgs> SelectedSourceChanged;
 
-        private Dictionary<string, ReadOnlyLinkGroupCollection> groupMap = new Dictionary<string, ReadOnlyLinkGroupCollection>();     // stores LinkGroupCollections by GroupKey
-        private bool isSelecting;
+        private readonly Dictionary<string, ReadOnlyLinkGroupCollection> _groupMap = new Dictionary<string, ReadOnlyLinkGroupCollection>();     // stores LinkGroupCollections by GroupKey
+        private bool _isSelecting;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ModernMenu"/> class.
         /// </summary>
         public ModernMenu()
         {
-            this.DefaultStyleKey = typeof(ModernMenu);
+            DefaultStyleKey = typeof(ModernMenu);
 
             // create a default link groups collection
             SetCurrentValue(LinkGroupsProperty, new LinkGroupCollection());
@@ -88,7 +86,7 @@ namespace Istar.ModernUI.Windows.Controls
 
                 // if no link selected or link doesn't exist in group links, auto-select first
                 if (group.Links != null) {
-                    if (selectedLink != null && !group.Links.Any(l => l == selectedLink)) {
+                    if (selectedLink != null && group.Links.All(l => l != selectedLink)) {
                         selectedLink = null;
                     }
 
@@ -125,7 +123,7 @@ namespace Istar.ModernUI.Windows.Controls
 
         private void OnSelectedSourceChanged(Uri oldValue, Uri newValue) 
         {
-            if (!this.isSelecting) {
+            if (!_isSelecting) {
                 // if old and new are equal, don't do anything
                 if (newValue != null && newValue.Equals(oldValue)) {
                     return;
@@ -135,10 +133,8 @@ namespace Istar.ModernUI.Windows.Controls
             }
 
             // raise SelectedSourceChanged event
-            var handler = this.SelectedSourceChanged;
-            if (handler != null) {
-                handler(this, new SourceEventArgs(newValue));
-            }
+            var handler = SelectedSourceChanged;
+            handler?.Invoke(this, new SourceEventArgs(newValue));
         }
 
         /// <summary>
@@ -174,18 +170,12 @@ namespace Istar.ModernUI.Windows.Controls
         /// <summary>
         /// Gets the selected link groups.
         /// </summary>
-        public LinkGroup SelectedLinkGroup
-        {
-            get { return (LinkGroup)GetValue(SelectedLinkGroupProperty); }
-        }
+        public LinkGroup SelectedLinkGroup => (LinkGroup)GetValue(SelectedLinkGroupProperty);
 
         /// <summary>
         /// Gets the collection of link groups that are currently visible.
         /// </summary>
-        public ReadOnlyLinkGroupCollection VisibleLinkGroups
-        {
-            get { return (ReadOnlyLinkGroupCollection)GetValue(VisibleLinkGroupsProperty); }
-        }
+        public ReadOnlyLinkGroupCollection VisibleLinkGroups => (ReadOnlyLinkGroupCollection)GetValue(VisibleLinkGroupsProperty);
 
         /// <summary>
         /// Gets a non-null key for given group.
@@ -200,17 +190,17 @@ namespace Istar.ModernUI.Windows.Controls
 
         private void RebuildMenu(LinkGroupCollection groups)
         {
-            this.groupMap.Clear();
+            _groupMap.Clear();
             if (groups != null) {
                 // fill the group map based on group key
                 foreach (var group in groups) {
                     var groupKey = GetGroupKey(group);
 
                     ReadOnlyLinkGroupCollection groupCollection;
-                    if (!this.groupMap.TryGetValue(groupKey, out groupCollection)) {
+                    if (!_groupMap.TryGetValue(groupKey, out groupCollection)) {
                         // create a new collection for this group key
                         groupCollection = new ReadOnlyLinkGroupCollection(new LinkGroupCollection());
-                        this.groupMap.Add(groupKey, groupCollection);
+                        _groupMap.Add(groupKey, groupCollection);
                     }
 
                     // add the group
@@ -227,11 +217,11 @@ namespace Istar.ModernUI.Windows.Controls
             LinkGroup selectedGroup = null;
             Link selectedLink = null;
 
-            if (this.LinkGroups != null) {
+            if (LinkGroups != null) {
                 // find the current select group and link based on the selected source
-                var linkInfo = (from g in this.LinkGroups
+                var linkInfo = (from g in LinkGroups
                                 from l in g.Links
-                                where l.Source == this.SelectedSource
+                                where l.Source == SelectedSource
                                 select new {
                                     Group = g,
                                     Link = l
@@ -243,11 +233,11 @@ namespace Istar.ModernUI.Windows.Controls
                 }
                 else {
                     // could not find link and group based on selected source, fall back to selected link group
-                    selectedGroup = this.SelectedLinkGroup;
+                    selectedGroup = SelectedLinkGroup;
 
                     // if selected group doesn't exist in available groups, select first group
-                    if (!this.LinkGroups.Any(g => g == selectedGroup)) {
-                        selectedGroup = this.LinkGroups.FirstOrDefault();
+                    if (LinkGroups.All(g => g != selectedGroup)) {
+                        selectedGroup = LinkGroups.FirstOrDefault();
                     }
                 }
             }
@@ -259,15 +249,15 @@ namespace Istar.ModernUI.Windows.Controls
 
                 // find the collection this group belongs to
                 var groupKey = GetGroupKey(selectedGroup);
-                this.groupMap.TryGetValue(groupKey, out groups);
+                _groupMap.TryGetValue(groupKey, out groups);
             }
 
-            this.isSelecting = true;
+            _isSelecting = true;
             // update selection
             SetValue(VisibleLinkGroupsPropertyKey, groups);
             SetCurrentValue(SelectedLinkGroupProperty, selectedGroup);
             SetCurrentValue(SelectedLinkProperty, selectedLink);
-            this.isSelecting = false;
+            _isSelecting = false;
         }
     }
 }

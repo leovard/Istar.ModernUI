@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Istar.ModernUI.Windows.Controls;
 
 namespace Istar.ModernUI.Windows.Navigation

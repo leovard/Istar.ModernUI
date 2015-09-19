@@ -4,9 +4,7 @@
 // All other rights reserved.
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Windows;
 using System.Windows.Media.Animation;
 using System.Windows.Controls;
@@ -98,9 +96,7 @@ namespace Istar.ModernUI.Windows.Controls
                 SetValue(IsTransitioningProperty, value);
                 _allowIsTransitioningWrite = false;
 
-                if (IsTransitioningChanged != null) {
-                    IsTransitioningChanged(this, EventArgs.Empty);
-                }
+                IsTransitioningChanged?.Invoke(this, EventArgs.Empty);
             }
         }
 
@@ -140,7 +136,6 @@ namespace Istar.ModernUI.Windows.Controls
         /// </summary>
         private Storyboard CurrentTransition
         {
-            get { return _currentTransition; }
             set
             {
                 // decouple event
@@ -198,7 +193,7 @@ namespace Istar.ModernUI.Windows.Controls
             // unable to find the transition.
             if (newStoryboard == null) {
                 // could be during initialization of xaml that presentationgroups was not yet defined
-                if (VisualTreeHelperEx.TryGetVisualStateGroup(source, PresentationGroup) == null) {
+                if (source.TryGetVisualStateGroup(PresentationGroup) == null) {
                     // will delay check
                     source.CurrentTransition = null;
                 }
@@ -273,16 +268,6 @@ namespace Istar.ModernUI.Windows.Controls
             DefaultStyleKeyProperty.OverrideMetadata(typeof(TransitioningContentControl), new FrameworkPropertyMetadata(typeof(TransitioningContentControl)));
         }
 #endif
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TransitioningContentControl"/> class.
-        /// </summary>
-        public TransitioningContentControl()
-        {
-#if SILVERLIGHT
-            DefaultStyleKey = typeof(TransitioningContentControl);
-#endif
-        }
 
         /// <summary>
         /// Builds the visual tree for the TransitioningContentControl control 
@@ -362,10 +347,8 @@ namespace Istar.ModernUI.Windows.Controls
         {
             AbortTransition();
 
-            RoutedEventHandler handler = TransitionCompleted;
-            if (handler != null) {
-                handler(this, new RoutedEventArgs());
-            }
+            var handler = TransitionCompleted;
+            handler?.Invoke(this, new RoutedEventArgs());
         }
 
         /// <summary>
@@ -388,7 +371,7 @@ namespace Istar.ModernUI.Windows.Controls
         /// <returns>A storyboard or null, if no storyboard was found.</returns>
         private Storyboard GetStoryboard(string newTransition)
         {
-            VisualStateGroup presentationGroup = VisualTreeHelperEx.TryGetVisualStateGroup(this, PresentationGroup);
+            var presentationGroup = this.TryGetVisualStateGroup(PresentationGroup);
             Storyboard newStoryboard = null;
             if (presentationGroup != null) {
                 newStoryboard = presentationGroup.States

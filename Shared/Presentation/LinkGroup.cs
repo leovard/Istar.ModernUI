@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Istar.ModernUI.Presentation
+﻿namespace Istar.ModernUI.Presentation
 {
     /// <summary>
     /// Represents a named group of links.
@@ -12,9 +6,8 @@ namespace Istar.ModernUI.Presentation
     public class LinkGroup
         : Displayable
     {
-        private string groupKey;
-        private Link selectedLink;
-        private LinkCollection links = new LinkCollection();
+        private string _groupKey;
+        private Link _selectedLink;
 
         /// <summary>
         /// Gets or sets the key of the group.
@@ -25,13 +18,12 @@ namespace Istar.ModernUI.Presentation
         /// </remarks>
         public string GroupKey
         {
-            get { return this.groupKey; }
+            get { return _groupKey; }
             set
             {
-                if (this.groupKey != value) {
-                    this.groupKey = value;
-                    OnPropertyChanged("GroupKey");
-                }
+                if (_groupKey == value) return;
+                _groupKey = value;
+                OnPropertyChanged("GroupKey");
             }
         }
 
@@ -41,13 +33,12 @@ namespace Istar.ModernUI.Presentation
         /// <value>The selected link.</value>
         internal Link SelectedLink
         {
-            get { return this.selectedLink; }
+            get { return _selectedLink; }
             set
             {
-                if (this.selectedLink != value) {
-                    this.selectedLink = value;
-                    OnPropertyChanged("SelectedLink");
-                }
+                if (_selectedLink == value) return;
+                _selectedLink = value;
+                OnPropertyChanged("SelectedLink");
             }
         }
 
@@ -55,9 +46,6 @@ namespace Istar.ModernUI.Presentation
         /// Gets the links.
         /// </summary>
         /// <value>The links.</value>
-        public LinkCollection Links
-        {
-            get { return this.links; }
-        }
+        public LinkCollection Links { get; } = new LinkCollection();
     }
 }

@@ -149,10 +149,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="$(MSBuildThisFileDirectory)Windows\Controls\ModernWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)ModernUIHelper.cs" />
@@ -174,6 +170,7 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)Themes\Token.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Win32\MonitorDpiType.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Win32\NativeMethods.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Win32\OSVersionHelper.cs" />
@@ -186,7 +183,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Windows\Controls\BBCode\Lexer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Windows\Controls\BBCode\ParseException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Windows\Controls\BBCode\Parser.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Windows\Controls\BBCode\Token.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Windows\Controls\BBCode\TokenBuffer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Windows\Controls\DataGridCheckBoxColumn.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Windows\Controls\DataGridComboBoxColumn.cs" />

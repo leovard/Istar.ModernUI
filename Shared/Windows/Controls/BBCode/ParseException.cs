@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Runtime.Serialization;
 
-namespace Istar.ModernUI.Windows.Controls.BBCode
+namespace Istar.ModernUI.Windows.Controls.BbCode
 {
     /// <summary>
     /// The exception for parse errors.

@@ -21,9 +21,9 @@
             </mui:ModernTab.ContentLoader>
         </mui:ModernTab>
 
-        <mui:BBCodeBlock Grid.Row="1"
+        <mui:BbCodeBlock Grid.Row="1"
                          Margin="{StaticResource StatusMargin}"
-                         BBCode="Powered by [url=http://flickr.com]Flickr[/url]"
+                         BbCode="Powered by [url=http://flickr.com]Flickr[/url]"
                          Foreground="{DynamicResource WindowTextReadOnly}" />
     </Grid>
 </UserControl>

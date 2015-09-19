@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Istar.ModernUI.Presentation
 {
@@ -12,7 +8,7 @@ namespace Istar.ModernUI.Presentation
     public class Link
         : Displayable
     {
-        private Uri source;
+        private Uri _source;
 
         /// <summary>
         /// Gets or sets the source uri.
@@ -20,13 +16,12 @@ namespace Istar.ModernUI.Presentation
         /// <value>The source.</value>
         public Uri Source
         {
-            get { return this.source; }
+            get { return _source; }
             set
             {
-                if (this.source != value) {
-                    this.source = value;
-                    OnPropertyChanged("Source");
-                }
+                if (_source == value) return;
+                _source = value;
+                OnPropertyChanged("Source");
             }
         }
     }

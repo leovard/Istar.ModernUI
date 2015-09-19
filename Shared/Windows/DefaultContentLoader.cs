@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -39,10 +36,7 @@ namespace Istar.ModernUI.Windows
         protected virtual object LoadContent(Uri uri)
         {
             // don't do anything in design mode
-            if (ModernUIHelper.IsInDesignMode) {
-                return null;
-            }
-            return Application.LoadComponent(uri);
+            return ModernUiHelper.IsInDesignMode ? null : Application.LoadComponent(uri);
         }
     }
 }

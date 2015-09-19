@@ -2,7 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
-namespace Istar.ModernUI.Windows.Controls.BBCode
+namespace Istar.ModernUI.Windows.Controls.BbCode
 {
     /// <summary>
     /// Represents a single token.
@@ -35,7 +35,7 @@ namespace Istar.ModernUI.Windows.Controls.BBCode
         /// <value>The value.</value>
         public string Value
         {
-            get { return this.value; }
+            get { return value; }
         }
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace Istar.ModernUI.Windows.Controls.BBCode
         /// <value>The type.</value>
         public int TokenType
         {
-            get { return this.tokenType; }
+            get { return tokenType; }
         }
 
         /// <summary>
@@ -55,7 +55,7 @@ namespace Istar.ModernUI.Windows.Controls.BBCode
         /// </returns>
         public override string ToString()
         {
-            return string.Format(CultureInfo.InvariantCulture, "{0}: {1}", this.tokenType, this.value);
+            return string.Format(CultureInfo.InvariantCulture, "{0}: {1}", tokenType, value);
         }
     }
 }

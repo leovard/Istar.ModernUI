@@ -1,23 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Xml;
-using System.Globalization;
 using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows;
 using System.Windows.Input;
 using Istar.ModernUI.Windows.Navigation;
 
-namespace Istar.ModernUI.Windows.Controls.BBCode
+namespace Istar.ModernUI.Windows.Controls.BbCode
 {
     /// <summary>
-    /// Represents the BBCode parser.
+    /// Represents the BbCode parser.
     /// </summary>
-    internal class BBCodeParser
+    internal class BbCodeParser
         : Parser<Span>
     {
-        // supporting a basic set of BBCode tags
+        // supporting a basic set of BbCode tags
         private const string TagBold = "b";
         private const string TagColor = "color";
         private const string TagItalic = "i";
@@ -29,14 +25,16 @@ namespace Istar.ModernUI.Windows.Controls.BBCode
         {
             public ParseContext(Span parent)
             {
-                this.Parent = parent;
+                Parent = parent;
             }
-            public Span Parent { get; private set; }
-            public double? FontSize { get; set; }
-            public FontWeight? FontWeight { get; set; }
-            public FontStyle? FontStyle { get; set; }
-            public Brush Foreground { get; set; }
-            public TextDecorationCollection TextDecorations { get; set; }
+
+            private Span Parent { get; set; }
+
+            public double? FontSize { private get; set; }
+            public FontWeight? FontWeight { private get; set; }
+            public FontStyle? FontStyle { private get; set; }
+            public Brush Foreground { private get; set; }
+            public TextDecorationCollection TextDecorations { private get; set; }
             public string NavigateUri { get; set; }
 
             /// <summary>
@@ -46,38 +44,38 @@ namespace Istar.ModernUI.Windows.Controls.BBCode
             public Run CreateRun(string text)
             {
                 var run = new Run { Text = text };
-                if (this.FontSize.HasValue) {
-                    run.FontSize = this.FontSize.Value;
+                if (FontSize.HasValue) {
+                    run.FontSize = FontSize.Value;
                 }
-                if (this.FontWeight.HasValue) {
-                    run.FontWeight = this.FontWeight.Value;
+                if (FontWeight.HasValue) {
+                    run.FontWeight = FontWeight.Value;
                 }
-                if (this.FontStyle.HasValue) {
-                    run.FontStyle = this.FontStyle.Value;
+                if (FontStyle.HasValue) {
+                    run.FontStyle = FontStyle.Value;
                 }
-                if (this.Foreground != null) {
-                    run.Foreground = this.Foreground;
+                if (Foreground != null) {
+                    run.Foreground = Foreground;
                 }
-                run.TextDecorations = this.TextDecorations;
+                run.TextDecorations = TextDecorations;
 
                 return run;
             }
         }
 
-        private FrameworkElement source;
+        private readonly FrameworkElement _source;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:BBCodeParser"/> class.
+        /// Initializes a new instance of the <see cref="T:BbCodeParser"/> class.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <param name="source">The framework source element this parser operates in.</param>
-        public BBCodeParser(string value, FrameworkElement source)
-            : base(new BBCodeLexer(value))
+        public BbCodeParser(string value, FrameworkElement source)
+            : base(new BbCodeLexer(value))
         {
             if (source == null) {
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             }
-            this.source = source;
+            _source = source;
         }
 
         /// <summary>
@@ -87,60 +85,89 @@ namespace Istar.ModernUI.Windows.Controls.BBCode
 
         private void ParseTag(string tag, bool start, ParseContext context)
         {
-            if (tag == TagBold) {
+            if (tag != TagBold)
+            {
+                if (tag != TagColor)
+                {
+                    if (tag != TagItalic)
+                    {
+                        if (tag != TagSize)
+                        {
+                            if (tag != TagUnderline)
+                            {
+                                if (tag != TagUrl) return;
+                                if (start)
+                                {
+                                    var token = La(1);
+                                    if (token.TokenType != BbCodeLexer.TokenAttribute) return;
+                                    context.NavigateUri = token.Value;
+                                    Consume();
+                                }
+                                else
+                                {
+                                    context.NavigateUri = null;
+                                }
+                            }
+                            else
+                            {
+                                context.TextDecorations = start ? TextDecorations.Underline : null;
+                            }
+                        }
+                        else
+                        {
+                            if (start)
+                            {
+                                var token = La(1);
+                                if (token.TokenType != BbCodeLexer.TokenAttribute) return;
+                                context.FontSize = Convert.ToDouble(token.Value);
+
+                                Consume();
+                            }
+                            else
+                            {
+                                context.FontSize = null;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (start)
+                        {
+                            context.FontStyle = FontStyles.Italic;
+                        }
+                        else
+                        {
+                            context.FontStyle = null;
+                        }
+                    }
+                }
+                else
+                {
+                    if (start)
+                    {
+                        var token = La(1);
+                        if (token.TokenType != BbCodeLexer.TokenAttribute) return;
+                        var convertFromString = ColorConverter.ConvertFromString(token.Value);
+                        if (convertFromString != null)
+                        {
+                            var color = (Color) convertFromString;
+                            context.Foreground = new SolidColorBrush(color);
+                        }
+
+                        Consume();
+                    }
+                    else
+                    {
+                        context.Foreground = null;
+                    }
+                }
+            }
+            else
+            {
                 context.FontWeight = null;
-                if (start) {
+                if (start)
+                {
                     context.FontWeight = FontWeights.Bold;
-                }
-            }
-            else if (tag == TagColor) {
-                if (start) {
-                    Token token = LA(1);
-                    if (token.TokenType == BBCodeLexer.TokenAttribute) {
-                        var color = (Color)ColorConverter.ConvertFromString(token.Value);
-                        context.Foreground = new SolidColorBrush(color);
-
-                        Consume();
-                    }
-                }
-                else {
-                    context.Foreground = null;
-                }
-            }
-            else if (tag == TagItalic) {
-                if (start) {
-                    context.FontStyle = FontStyles.Italic;
-                }
-                else {
-                    context.FontStyle = null;
-                }
-            }
-            else if (tag == TagSize) {
-                if (start) {
-                    Token token = LA(1);
-                    if (token.TokenType == BBCodeLexer.TokenAttribute) {
-                        context.FontSize = Convert.ToDouble(token.Value);
-
-                        Consume();
-                    }
-                }
-                else {
-                    context.FontSize = null;
-                }
-            }
-            else if (tag == TagUnderline) {
-                context.TextDecorations = start ? TextDecorations.Underline : null;
-            }
-            else if (tag == TagUrl) {
-                if (start) {
-                    Token token = LA(1);
-                    if (token.TokenType == BBCodeLexer.TokenAttribute) {
-                        context.NavigateUri = token.Value;
-                        Consume();
-                    }
-                }
-                else {
-                    context.NavigateUri = null;
                 }
             }
         }
@@ -150,55 +177,73 @@ namespace Istar.ModernUI.Windows.Controls.BBCode
             var context = new ParseContext(span);
 
             while (true) {
-                Token token = LA(1);
+                var token = La(1);
                 Consume();
 
-                if (token.TokenType == BBCodeLexer.TokenStartTag) {
-                    ParseTag(token.Value, true, context);
-                }
-                else if (token.TokenType == BBCodeLexer.TokenEndTag) {
-                    ParseTag(token.Value, false, context);
-                }
-                else if (token.TokenType == BBCodeLexer.TokenText) {
-                    var parent = span;
-                    Uri uri;
-                    string parameter = null;
-                    string targetName = null;
-
-                    // parse uri value for optional parameter and/or target, eg [url=cmd://foo|parameter|target]
-                    if (NavigationHelper.TryParseUriWithParameters(context.NavigateUri, out uri, out parameter, out targetName)) {
-                        var link = new Hyperlink();
-
-                        // assign ICommand instance if available, otherwise set NavigateUri
-                        ICommand command;
-                        if (this.Commands != null && this.Commands.TryGetValue(uri, out command)) {
-                            link.Command = command;
-                            link.CommandParameter = parameter;
-                            if (targetName != null) {
-                                link.CommandTarget = this.source.FindName(targetName) as IInputElement;
+                if (token.TokenType != BbCodeLexer.TokenStartTag)
+                {
+                    if (token.TokenType != BbCodeLexer.TokenEndTag)
+                    {
+                        if (token.TokenType != BbCodeLexer.TokenText)
+                        {
+                            if (token.TokenType != BbCodeLexer.TokenLineBreak)
+                            {
+                                if (token.TokenType == BbCodeLexer.TokenAttribute)
+                                {
+                                    throw new ParseException(Resources.UnexpectedToken);
+                                }
+                                if (token.TokenType == Lexer.TokenEnd)
+                                {
+                                    break;
+                                }
+                                throw new ParseException(Resources.UnknownTokenType);
                             }
+                            span.Inlines.Add(new LineBreak());
                         }
-                        else {
-                            link.NavigateUri = uri;
-                            link.TargetName = parameter;
+                        else
+                        {
+                            var parent = span;
+                            Uri uri;
+                            string parameter;
+                            string targetName;
+
+                            // parse uri value for optional parameter and/or target, eg [url=cmd://foo|parameter|target]
+                            if (NavigationHelper.TryParseUriWithParameters(context.NavigateUri, out uri, out parameter,
+                                out targetName))
+                            {
+                                var link = new Hyperlink();
+
+                                // assign ICommand instance if available, otherwise set NavigateUri
+                                ICommand command;
+                                if (Commands != null && Commands.TryGetValue(uri, out command))
+                                {
+                                    link.Command = command;
+                                    link.CommandParameter = parameter;
+                                    if (targetName != null)
+                                    {
+                                        link.CommandTarget = _source.FindName(targetName) as IInputElement;
+                                    }
+                                }
+                                else
+                                {
+                                    link.NavigateUri = uri;
+                                    link.TargetName = parameter;
+                                }
+                                parent = link;
+                                span.Inlines.Add(parent);
+                            }
+                            var run = context.CreateRun(token.Value);
+                            parent.Inlines.Add(run);
                         }
-                        parent = link;
-                        span.Inlines.Add(parent);
                     }
-                    var run = context.CreateRun(token.Value);
-                    parent.Inlines.Add(run);
+                    else
+                    {
+                        ParseTag(token.Value, false, context);
+                    }
                 }
-                else if (token.TokenType == BBCodeLexer.TokenLineBreak) {
-                    span.Inlines.Add(new LineBreak());
-                }
-                else if (token.TokenType == BBCodeLexer.TokenAttribute) {
-                    throw new ParseException(Resources.UnexpectedToken);
-                }
-                else if (token.TokenType == BBCodeLexer.TokenEnd) {
-                    break;
-                }
-                else {
-                    throw new ParseException(Resources.UnknownTokenType);
+                else
+                {
+                    ParseTag(token.Value, true, context);
                 }
             }
         }

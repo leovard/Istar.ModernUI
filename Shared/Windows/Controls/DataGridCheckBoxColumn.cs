@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 
 namespace Istar.ModernUI.Windows.Controls
 {
@@ -18,8 +13,8 @@ namespace Istar.ModernUI.Windows.Controls
         /// </summary>
         public DataGridCheckBoxColumn()
         {
-            this.ElementStyle = Application.Current.Resources["DataGridCheckBoxStyle"] as Style;
-            this.EditingElementStyle = Application.Current.Resources["DataGridEditingCheckBoxStyle"] as Style;
+            ElementStyle = Application.Current.Resources["DataGridCheckBoxStyle"] as Style;
+            EditingElementStyle = Application.Current.Resources["DataGridEditingCheckBoxStyle"] as Style;
         }
     }
 }

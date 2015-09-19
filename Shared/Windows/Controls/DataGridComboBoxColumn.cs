@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 
 namespace Istar.ModernUI.Windows.Controls
 {
@@ -18,7 +13,7 @@ namespace Istar.ModernUI.Windows.Controls
         /// </summary>
         public DataGridComboBoxColumn()
         {
-            this.EditingElementStyle = Application.Current.Resources["DataGridEditingComboBoxStyle"] as Style;
+            EditingElementStyle = Application.Current.Resources["DataGridEditingComboBoxStyle"] as Style;
         }
     }
 }

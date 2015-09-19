@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Windows.Data;
 using System.Globalization;
 using System.Windows;
@@ -26,23 +23,17 @@ namespace Istar.ModernUI.Windows.Converters
         /// </returns>
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            bool flag = false;
+            var flag = false;
             if (value is bool) {
                 flag = (bool)value;
             }
-            else if (value is bool?) {
-                bool? nullable = (bool?)value;
-                flag = nullable.HasValue ? nullable.Value : false;
-            }
 
-            bool inverse = (parameter as string) == "inverse";
+            var inverse = (parameter as string) == "inverse";
 
             if (inverse) {
                 return (flag ? Visibility.Collapsed : Visibility.Visible);
             }
-            else {
-                return (flag ? Visibility.Visible : Visibility.Collapsed);
-            }
+            return (flag ? Visibility.Visible : Visibility.Collapsed);
         }
 
         /// <summary>

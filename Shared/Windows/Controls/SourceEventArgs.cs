@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Istar.ModernUI.Windows.Controls
 {
@@ -18,7 +14,7 @@ namespace Istar.ModernUI.Windows.Controls
         /// <param name="source"></param>
         public SourceEventArgs(Uri source)
         {
-            this.Source = source;
+            Source = source;
         }
 
         /// <summary>

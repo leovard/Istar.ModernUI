@@ -1,18 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 
 namespace Istar.ModernUI.Win32
 {
     internal class NativeMethods
     {
-        public const int S_OK = 0;
-        public const int WM_DPICHANGED = 0x02E0;
-        public const int MONITOR_DEFAULTTONEAREST = 0x00000002;
+        public const int SOk = 0;
+        public const int WmDpichanged = 0x02E0;
+        public const int MonitorDefaulttonearest = 0x00000002;
 
         [DllImport("Shcore.dll")]
         public static extern int GetProcessDpiAwareness(IntPtr hprocess, out ProcessDpiAwareness value);

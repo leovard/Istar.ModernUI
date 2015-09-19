@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Istar.ModernUI.Presentation
 {
@@ -12,8 +8,8 @@ namespace Istar.ModernUI.Presentation
     public class RelayCommand
         : CommandBase
     {
-        private Action<object> execute;
-        private Func<object, bool> canExecute;
+        private readonly Action<object> _execute;
+        private readonly Func<object, bool> _canExecute;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RelayCommand"/> class.
@@ -23,14 +19,14 @@ namespace Istar.ModernUI.Presentation
         public RelayCommand(Action<object> execute, Func<object, bool> canExecute = null)
         {
             if (execute == null) {
-                throw new ArgumentNullException("execute");
+                throw new ArgumentNullException(nameof(execute));
             }
             if (canExecute == null) {
                 // no can execute provided, then always executable
-                canExecute = (o) => true;
+                canExecute = o => true;
             }
-            this.execute = execute;
-            this.canExecute = canExecute;
+            _execute = execute;
+            _canExecute = canExecute;
         }
 
         /// <summary>
@@ -42,7 +38,7 @@ namespace Istar.ModernUI.Presentation
         /// </returns>
         public override bool CanExecute(object parameter)
         {
-            return canExecute(parameter);
+            return _canExecute(parameter);
         }
 
         /// <summary>
@@ -51,7 +47,7 @@ namespace Istar.ModernUI.Presentation
         /// <param name="parameter">The parameter.</param>
         protected override void OnExecute(object parameter)
         {
-            execute(parameter);
+            _execute(parameter);
         }
     }
 }

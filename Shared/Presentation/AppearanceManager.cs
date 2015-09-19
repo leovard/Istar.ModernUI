@@ -1,10 +1,6 @@
 ﻿using Istar.ModernUI.Windows.Navigation;
 using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -43,8 +39,6 @@ namespace Istar.ModernUI.Presentation
         /// </summary>
         public const string KeyFixedFontSize = "FixedFontSize";
 
-        private static AppearanceManager current = new AppearanceManager();
-
         /// <summary>
         /// Initializes a new instance of the <see cref="AppearanceManager"/> class.
         /// </summary>
@@ -67,9 +61,10 @@ namespace Istar.ModernUI.Presentation
                 else {
                     // parse color from string
                     var str = o as string;
-                    if (str != null) {
-                        AccentColor = (Color)ColorConverter.ConvertFromString(str);
-                    }
+                    if (str == null) return;
+                    var convertFromString = ColorConverter.ConvertFromString(str);
+                    if (convertFromString != null)
+                        AccentColor = (Color)convertFromString;
                 }
             }, o => o is Color || o is string);
         }
@@ -85,18 +80,15 @@ namespace Istar.ModernUI.Presentation
         private Uri GetThemeSource()
         {
             var dict = GetThemeDictionary();
-            if (dict != null) {
-                return dict.Source;
-            }
+            return dict?.Source;
 
             // could not determine the theme dictionary
-            return null;
         }
 
         private void SetThemeSource(Uri source, bool useThemeAccentColor)
         {
             if (source == null) {
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             }
 
             var oldThemeDict = GetThemeDictionary();
@@ -137,7 +129,7 @@ namespace Istar.ModernUI.Presentation
             var defaultFontSize = Application.Current.Resources[KeyDefaultFontSize] as double?;
              
             if (defaultFontSize.HasValue) {
-                return defaultFontSize.Value == 12D ? FontSize.Small : FontSize.Large;
+                return Math.Abs(defaultFontSize.Value - 12D) <= 0 ? FontSize.Small : FontSize.Large;
             }
 
             // default large
@@ -160,12 +152,9 @@ namespace Istar.ModernUI.Presentation
         {
             var accentColor = Application.Current.Resources[KeyAccentColor] as Color?;
 
-            if (accentColor.HasValue) {
-                return accentColor.Value;
-            }
+            return accentColor ?? Color.FromArgb(0xff, 0x1b, 0xa1, 0xe2);
 
             // default color: teal
-            return Color.FromArgb(0xff, 0x1b, 0xa1, 0xe2);
         }
 
         private void SetAccentColor(Color value)
@@ -184,10 +173,7 @@ namespace Istar.ModernUI.Presentation
         /// <summary>
         /// Gets the current <see cref="AppearanceManager"/> instance.
         /// </summary>
-        public static AppearanceManager Current
-        {
-            get { return current; }
-        }
+        public static AppearanceManager Current { get; } = new AppearanceManager();
 
         /// <summary>
         /// The command that sets the dark theme.

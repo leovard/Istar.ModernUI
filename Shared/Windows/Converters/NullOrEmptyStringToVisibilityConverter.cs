@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Windows.Data;
 using System.Globalization;
 using System.Windows;
@@ -27,8 +24,9 @@ namespace Istar.ModernUI.Windows.Converters
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             var flag = value == null;
-            if (value is string) {
-                flag = string.IsNullOrEmpty((string)value);
+            var s = value as string;
+            if (s != null) {
+                flag = string.IsNullOrEmpty(s);
             }
             var inverse = (parameter as string) == "inverse";
 

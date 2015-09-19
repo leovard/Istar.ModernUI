@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
-namespace Istar.ModernUI.Windows.Controls.BBCode
+namespace Istar.ModernUI.Windows.Controls.BbCode
 {
     /// <summary>
     /// Provides basic lexer functionality.
@@ -14,8 +15,8 @@ namespace Istar.ModernUI.Windows.Controls.BBCode
         /// </summary>
         public const int TokenEnd = int.MaxValue;
 
-        private CharBuffer buffer;
-        private Stack<int> states;
+        private readonly CharBuffer _buffer;
+        private readonly Stack<int> _states;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:Lexer"/> class.
@@ -23,8 +24,8 @@ namespace Istar.ModernUI.Windows.Controls.BBCode
         /// <param name="value">The value.</param>
         protected Lexer(string value)
         {
-            this.buffer = new CharBuffer(value);
-            this.states = new Stack<int>();
+            _buffer = new CharBuffer(value);
+            _states = new Stack<int>();
         }
 
         private static void ValidateOccurence(int count, int minOccurs, int maxOccurs)
@@ -48,8 +49,8 @@ namespace Istar.ModernUI.Windows.Controls.BBCode
         {
             get
             {
-                if (this.states.Count > 0) {
-                    return this.states.Peek();
+                if (_states.Count > 0) {
+                    return _states.Peek();
                 }
                 return DefaultState;
             }
@@ -61,7 +62,7 @@ namespace Istar.ModernUI.Windows.Controls.BBCode
         /// <param name="state">The state.</param>
         protected void PushState(int state)
         {
-            this.states.Push(state);
+            _states.Push(state);
         }
 
         /// <summary>
@@ -70,7 +71,7 @@ namespace Istar.ModernUI.Windows.Controls.BBCode
         /// <returns></returns>
         protected int PopState()
         {
-            return this.states.Pop();
+            return _states.Pop();
         }
 
         /// <summary>
@@ -78,9 +79,9 @@ namespace Istar.ModernUI.Windows.Controls.BBCode
         /// </summary>
         /// <param name="count">The number of characters to look ahead.</param>
         /// <returns></returns>
-        protected char LA(int count)
+        protected char La(int count)
         {
-            return this.buffer.LA(count);
+            return _buffer.La(count);
         }
 
         /// <summary>
@@ -88,7 +89,7 @@ namespace Istar.ModernUI.Windows.Controls.BBCode
         /// </summary>
         protected void Mark()
         {
-            this.buffer.Mark();
+            _buffer.Mark();
         }
 
         /// <summary>
@@ -98,7 +99,7 @@ namespace Istar.ModernUI.Windows.Controls.BBCode
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
         protected string GetMark()
         {
-            return this.buffer.GetMark();
+            return _buffer.GetMark();
         }
 
         /// <summary>
@@ -106,7 +107,7 @@ namespace Istar.ModernUI.Windows.Controls.BBCode
         /// </summary>
         protected void Consume()
         {
-            this.buffer.Consume();
+            _buffer.Consume();
         }
 
         /// <summary>
@@ -119,7 +120,7 @@ namespace Istar.ModernUI.Windows.Controls.BBCode
         /// </returns>
         protected bool IsInRange(char first, char last)
         {
-            char la = LA(1);
+            var la = La(1);
             return la >= first && la <= last;
         }
 
@@ -135,14 +136,8 @@ namespace Istar.ModernUI.Windows.Controls.BBCode
             if (value == null) {
                 return false;
             }
-            char la = LA(1);
-            for (int i = 0; i < value.Length; i++) {
-                if (la == value[i]) {
-                    return true;
-                }
-            }
-
-            return false;
+            var la = La(1);
+            return value.Any(t => la == t);
         }
 
         /// <summary>
@@ -151,7 +146,7 @@ namespace Istar.ModernUI.Windows.Controls.BBCode
         /// <param name="value">The value.</param>
         protected void Match(char value)
         {
-            if (LA(1) == value) {
+            if (La(1) == value) {
                 Consume();
             }
             else {
@@ -167,8 +162,8 @@ namespace Istar.ModernUI.Windows.Controls.BBCode
         /// <param name="maxOccurs">The max occurs.</param>
         protected void Match(char value, int minOccurs, int maxOccurs)
         {
-            int i = 0;
-            while (LA(1) == value) {
+            var i = 0;
+            while (La(1) == value) {
                 Consume();
                 i++;
             }
@@ -182,10 +177,11 @@ namespace Istar.ModernUI.Windows.Controls.BBCode
         protected void Match(string value)
         {
             if (value == null) {
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
             }
-            for (int i = 0; i < value.Length; i++) {
-                if (LA(1) == value[i]) {
+            foreach (var t in value)
+            {
+                if (La(1) == t) {
                     Consume();
                 }
                 else {
@@ -216,7 +212,7 @@ namespace Istar.ModernUI.Windows.Controls.BBCode
         /// <param name="maxOccurs">The max occurs.</param>
         protected void MatchRange(char[] value, int minOccurs, int maxOccurs)
         {
-            int i = 0;
+            var i = 0;
             while (IsInRange(value)) {
                 Consume();
                 i++;
@@ -248,7 +244,7 @@ namespace Istar.ModernUI.Windows.Controls.BBCode
         /// <param name="maxOccurs">The max occurs.</param>
         protected void MatchRange(char first, char last, int minOccurs, int maxOccurs)
         {
-            int i = 0;
+            var i = 0;
             while (IsInRange(first, last)) {
                 Consume();
                 i++;

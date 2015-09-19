@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace Istar.ModernUI.Presentation
@@ -18,8 +14,8 @@ namespace Istar.ModernUI.Presentation
         /// </summary>
         public event EventHandler CanExecuteChanged
         {
-            add { System.Windows.Input.CommandManager.RequerySuggested += value; }
-            remove { System.Windows.Input.CommandManager.RequerySuggested -= value; }
+            add { CommandManager.RequerySuggested += value; }
+            remove { CommandManager.RequerySuggested -= value; }
         }
 
         /// <summary>
@@ -27,7 +23,7 @@ namespace Istar.ModernUI.Presentation
         /// </summary>
         public void OnCanExecuteChanged()
         {
-            System.Windows.Input.CommandManager.InvalidateRequerySuggested();
+            CommandManager.InvalidateRequerySuggested();
         }
 
         /// <summary>

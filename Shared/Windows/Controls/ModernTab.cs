@@ -1,9 +1,6 @@
 ﻿using Istar.ModernUI.Presentation;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -41,14 +38,14 @@ namespace Istar.ModernUI.Windows.Controls
         /// </summary>
         public event EventHandler<SourceEventArgs> SelectedSourceChanged;
 
-        private ListBox linkList;
+        private ListBox _linkList;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ModernTab"/> control.
         /// </summary>
         public ModernTab()
         {
-            this.DefaultStyleKey = typeof(ModernTab);
+            DefaultStyleKey = typeof(ModernTab);
 
             // create a default links collection
             SetCurrentValue(LinksProperty, new LinkCollection());
@@ -61,28 +58,27 @@ namespace Istar.ModernUI.Windows.Controls
 
         private static void OnSelectedSourceChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
         {
-            ((ModernTab)o).OnSelectedSourceChanged((Uri)e.OldValue, (Uri)e.NewValue);
+            ((ModernTab)o).OnSelectedSourceChanged((Uri)e.NewValue);
         }
 
-        private void OnSelectedSourceChanged(Uri oldValue, Uri newValue)
+        private void OnSelectedSourceChanged(Uri newValue)
         {
             UpdateSelection();
 
             // raise SelectedSourceChanged event
-            var handler = this.SelectedSourceChanged;
-            if (handler != null) {
-                handler(this, new SourceEventArgs(newValue));
-            }
+            var handler = SelectedSourceChanged;
+            handler?.Invoke(this, new SourceEventArgs(newValue));
         }
 
         private void UpdateSelection()
         {
-            if (this.linkList == null || this.Links == null) {
+            if (_linkList == null || Links == null)
+            {
                 return;
             }
 
             // sync list selection with current source
-            this.linkList.SelectedItem = this.Links.FirstOrDefault(l => l.Source == this.SelectedSource);
+            _linkList.SelectedItem = Links.FirstOrDefault(l => l.Source == SelectedSource);
         }
 
         /// <summary>
@@ -92,13 +88,15 @@ namespace Istar.ModernUI.Windows.Controls
         {
             base.OnApplyTemplate();
 
-            if (this.linkList != null) {
-                this.linkList.SelectionChanged -= OnLinkListSelectionChanged;
+            if (_linkList != null)
+            {
+                _linkList.SelectionChanged -= OnLinkListSelectionChanged;
             }
 
-            this.linkList = GetTemplateChild("LinkList") as ListBox;
-            if (this.linkList != null) {
-                this.linkList.SelectionChanged += OnLinkListSelectionChanged;
+            _linkList = GetTemplateChild("LinkList") as ListBox;
+            if (_linkList != null)
+            {
+                _linkList.SelectionChanged += OnLinkListSelectionChanged;
             }
 
             UpdateSelection();
@@ -106,8 +104,9 @@ namespace Istar.ModernUI.Windows.Controls
 
         private void OnLinkListSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var link = this.linkList.SelectedItem as Link;
-            if (link != null && link.Source != this.SelectedSource) {
+            var link = _linkList.SelectedItem as Link;
+            if (link != null && link.Source != SelectedSource)
+            {
                 SetCurrentValue(SelectedSourceProperty, link.Source);
             }
         }

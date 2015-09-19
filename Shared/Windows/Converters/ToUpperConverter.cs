@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Windows.Data;
 
 namespace Istar.ModernUI.Windows.Converters
@@ -24,12 +21,9 @@ namespace Istar.ModernUI.Windows.Converters
         /// </returns>
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            if (value != null) {
-                var strValue = value.ToString();
+            var strValue = value?.ToString();
 
-                return strValue.ToUpperInvariant();
-            }
-            return null;
+            return strValue?.ToUpperInvariant();
         }
 
         /// <summary>

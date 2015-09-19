@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Istar.ModernUI.Windows.Controls.BBCode
+namespace Istar.ModernUI.Windows.Controls.BbCode
 {
     /// <summary>
     /// Represents a character buffer.
     /// </summary>
     internal class CharBuffer
     {
-        private string value;
-        private int position;
-        private int mark;
+        private readonly string _value;
+        private int _position;
+        private int _mark;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:CharBuffer"/> class.
@@ -19,9 +19,9 @@ namespace Istar.ModernUI.Windows.Controls.BBCode
         public CharBuffer(string value)
         {
             if (value == null) {
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
             }
-            this.value = value;
+            _value = value;
         }
 
         /// <summary>
@@ -29,14 +29,10 @@ namespace Istar.ModernUI.Windows.Controls.BBCode
         /// </summary>
         /// <param name="count">The number of character to look ahead.</param>
         /// <returns></returns>
-        public char LA(int count)
+        public char La(int count)
         {
-            int index = this.position + count - 1;
-            if (index < this.value.Length) {
-                return this.value[index];
-            }
-
-            return char.MaxValue;
+            var index = _position + count - 1;
+            return index < _value.Length ? _value[index] : char.MaxValue;
         }
 
         /// <summary>
@@ -44,7 +40,7 @@ namespace Istar.ModernUI.Windows.Controls.BBCode
         /// </summary>
         public void Mark()
         {
-            this.mark = this.position;
+            _mark = _position;
         }
 
         /// <summary>
@@ -54,10 +50,7 @@ namespace Istar.ModernUI.Windows.Controls.BBCode
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
         public string GetMark()
         {
-            if (this.mark < this.position) {
-                return this.value.Substring(this.mark, this.position - this.mark);
-            }
-            return string.Empty;
+            return _mark < _position ? _value.Substring(_mark, _position - _mark) : string.Empty;
         }
 
         /// <summary>
@@ -65,7 +58,7 @@ namespace Istar.ModernUI.Windows.Controls.BBCode
         /// </summary>
         public void Consume()
         {
-            this.position++;
+            _position++;
         }
     }
 }

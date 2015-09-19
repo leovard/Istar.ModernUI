@@ -1,65 +1,57 @@
-﻿using Istar.ModernUI.Windows.Controls.BBCode;
-using Istar.ModernUI.Windows.Media;
+﻿using Istar.ModernUI.Windows.Controls.BbCode;
 using Istar.ModernUI.Windows.Navigation;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Markup;
-using System.Windows.Media;
 using System.Windows.Navigation;
 
 namespace Istar.ModernUI.Windows.Controls
 {
     /// <summary>
-    /// A lighweight control for displaying small amounts of rich formatted BBCode content.
+    /// A lighweight control for displaying small amounts of rich formatted BbCode content.
     /// </summary>
-    [ContentProperty("BBCode")]
-    public class BBCodeBlock
+    [ContentProperty("BbCode")]
+    public class BbCodeBlock
         : TextBlock
     {
         /// <summary>
-        /// Identifies the BBCode dependency property.
+        /// Identifies the BbCode dependency property.
         /// </summary>
-        public static DependencyProperty BBCodeProperty = DependencyProperty.Register("BBCode", typeof(string), typeof(BBCodeBlock), new PropertyMetadata(new PropertyChangedCallback(OnBBCodeChanged)));
+        public static DependencyProperty BbCodeProperty = DependencyProperty.Register("BbCode", typeof(string), typeof(BbCodeBlock), new PropertyMetadata(OnBbCodeChangedrty));
         /// <summary>
         /// Identifies the LinkNavigator dependency property.
         /// </summary>
-        public static DependencyProperty LinkNavigatorProperty = DependencyProperty.Register("LinkNavigator", typeof(ILinkNavigator), typeof(BBCodeBlock), new PropertyMetadata(new DefaultLinkNavigator(), OnLinkNavigatorChanged));
+        public static DependencyProperty LinkNavigatorProperty = DependencyProperty.Register("LinkNavigator", typeof(ILinkNavigator), typeof(BbCodeBlock), new PropertyMetadata(new DefaultLinkNavigator(), OnLinkNavigatorChanged));
 
-        private bool dirty = false;
+        private bool _dirty;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="BBCodeBlock"/> class.
+        /// Initializes a new instance of the <see cref="BbCodeBlock"/> class.
         /// </summary>
-        public BBCodeBlock()
+        public BbCodeBlock()
         {
-            // ensures the implicit BBCodeBlock style is used
-            this.DefaultStyleKey = typeof(BBCodeBlock);
+            // ensures the implicit BbCodeBlock style is used
+            DefaultStyleKey = typeof(BbCodeBlock);
 
-            AddHandler(Hyperlink.LoadedEvent, new RoutedEventHandler(OnLoaded));
+            AddHandler(FrameworkContentElement.LoadedEvent, new RoutedEventHandler(OnLoaded));
             AddHandler(Hyperlink.RequestNavigateEvent, new RequestNavigateEventHandler(OnRequestNavigate));
         }
 
-        private static void OnBBCodeChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
+        private static void OnBbCodeChangedrty(DependencyObject o, DependencyPropertyChangedEventArgs e)
         {
-            ((BBCodeBlock)o).UpdateDirty();
+            ((BbCodeBlock)o).UpdateDirty();
         }
 
         private static void OnLinkNavigatorChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
         {
             if (e.NewValue == null) {
                 // null values disallowed
-                throw new ArgumentNullException("LinkNavigator");
+                throw new ArgumentNullException(nameof(o));
             }
 
-            ((BBCodeBlock)o).UpdateDirty();
+            ((BbCodeBlock)o).UpdateDirty();
         }
 
         private void OnLoaded(object o, EventArgs e)
@@ -69,42 +61,42 @@ namespace Istar.ModernUI.Windows.Controls
 
         private void UpdateDirty()
         {
-            this.dirty = true;
+            _dirty = true;
             Update();
         }
 
         private void Update()
         {
-            if (!this.IsLoaded || !this.dirty) {
+            if (!IsLoaded || !_dirty) {
                 return;
             }
 
-            var bbcode = this.BBCode;
+            var bbCode = BbCode;
 
-            this.Inlines.Clear();
+            Inlines.Clear();
 
-            if (!string.IsNullOrWhiteSpace(bbcode)) {
+            if (!string.IsNullOrWhiteSpace(bbCode)) {
                 Inline inline;
                 try {
-                    var parser = new BBCodeParser(bbcode, this) {
-                        Commands = this.LinkNavigator.Commands
+                    var parser = new BbCodeParser(bbCode, this) {
+                        Commands = LinkNavigator.Commands
                     };
                     inline = parser.Parse();
                 }
                 catch (Exception) {
-                    // parsing failed, display BBCode value as-is
-                    inline = new Run { Text = bbcode };
+                    // parsing failed, display BbCode value as-is
+                    inline = new Run { Text = bbCode };
                 }
-                this.Inlines.Add(inline);
+                Inlines.Add(inline);
             }
-            this.dirty = false;
+            _dirty = false;
         }
 
         private void OnRequestNavigate(object sender, RequestNavigateEventArgs e)
         {
             try {
                 // perform navigation using the link navigator
-                this.LinkNavigator.Navigate(e.Uri, this, e.Target);
+                LinkNavigator.Navigate(e.Uri, this, e.Target);
             }
             catch (Exception error) {
                 // display navigation failures
@@ -116,10 +108,10 @@ namespace Istar.ModernUI.Windows.Controls
         /// Gets or sets the BB code.
         /// </summary>
         /// <value>The BB code.</value>
-        public string BBCode
+        public string BbCode
         {
-            get { return (string)GetValue(BBCodeProperty); }
-            set { SetValue(BBCodeProperty, value); }
+            get { return (string)GetValue(BbCodeProperty); }
+            set { SetValue(BbCodeProperty, value); }
         }
 
         /// <summary>

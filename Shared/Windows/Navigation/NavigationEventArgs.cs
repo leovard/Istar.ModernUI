@@ -1,11 +1,4 @@
-﻿using Istar.ModernUI.Windows.Controls;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Istar.ModernUI.Windows.Navigation
+﻿namespace Istar.ModernUI.Windows.Navigation
 {
     /// <summary>
     /// Provides data for frame navigation events.

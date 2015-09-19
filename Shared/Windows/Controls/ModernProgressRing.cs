@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 
 namespace Istar.ModernUI.Windows.Controls
@@ -30,12 +25,12 @@ namespace Istar.ModernUI.Windows.Controls
         /// </summary>
         public ModernProgressRing()
         {
-            this.DefaultStyleKey = typeof(ModernProgressRing);
+            DefaultStyleKey = typeof(ModernProgressRing);
         }
 
         private void GotoCurrentState(bool animate)
         {
-            var state = this.IsActive ? StateActive : StateInactive;
+            var state = IsActive ? StateActive : StateInactive;
 
             VisualStateManager.GoToState(this, state, animate);
         }

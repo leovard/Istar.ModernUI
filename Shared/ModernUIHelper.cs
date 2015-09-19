@@ -1,10 +1,6 @@
 ﻿using Istar.ModernUI.Win32;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace Istar.ModernUI
@@ -12,9 +8,9 @@ namespace Istar.ModernUI
     /// <summary>
     /// Provides various common helper methods.
     /// </summary>
-    public static class ModernUIHelper
+    public static class ModernUiHelper
     {
-        private static bool? isInDesignMode;
+        private static bool? _isInDesignMode;
 
         /// <summary>
         /// Determines whether the current code is executed in a design time environment such as Visual Studio or Blend.
@@ -23,10 +19,10 @@ namespace Istar.ModernUI
         {
             get
             {
-                if (!isInDesignMode.HasValue) {
-                    isInDesignMode = DesignerProperties.GetIsInDesignMode(new DependencyObject());
+                if (!_isInDesignMode.HasValue) {
+                    _isInDesignMode = DesignerProperties.GetIsInDesignMode(new DependencyObject());
                 }
-                return isInDesignMode.Value;
+                return _isInDesignMode.Value;
             }
         }
 
@@ -39,16 +35,16 @@ namespace Istar.ModernUI
         /// <exception cref="System.ComponentModel.Win32Exception"></exception>
         public static ProcessDpiAwareness GetDpiAwareness()
         {
-            if (OSVersionHelper.IsWindows8Point1OrGreater) {
+            if (OsVersionHelper.IsWindows8Point1OrGreater) {
                 ProcessDpiAwareness value;
                 var result = NativeMethods.GetProcessDpiAwareness(IntPtr.Zero, out value);
-                if (result != NativeMethods.S_OK) {
+                if (result != NativeMethods.SOk) {
                     throw new Win32Exception(result);
                 }
 
                 return value;
             }
-            if (OSVersionHelper.IsWindowsVistaOrGreater) {
+            if (OsVersionHelper.IsWindowsVistaOrGreater) {
                 // use older Win32 API to query system DPI awareness
                 return NativeMethods.IsProcessDPIAware() ? ProcessDpiAwareness.SystemDpiAware : ProcessDpiAwareness.DpiUnaware;
             }
@@ -76,17 +72,15 @@ namespace Istar.ModernUI
             var awareness = GetDpiAwareness();
 
             // initial awareness must be DpiUnaware
-            if (awareness == ProcessDpiAwareness.DpiUnaware) {
-                if (OSVersionHelper.IsWindows8Point1OrGreater) {
-                    return NativeMethods.SetProcessDpiAwareness(ProcessDpiAwareness.PerMonitorDpiAware) == NativeMethods.S_OK;
-                }
-
-                // use older Win32 API to set the awareness to SystemDpiAware
-                return NativeMethods.SetProcessDPIAware() == NativeMethods.S_OK;
+            if (awareness != ProcessDpiAwareness.DpiUnaware) return awareness == ProcessDpiAwareness.PerMonitorDpiAware;
+            if (OsVersionHelper.IsWindows8Point1OrGreater) {
+                return NativeMethods.SetProcessDpiAwareness(ProcessDpiAwareness.PerMonitorDpiAware) == NativeMethods.SOk;
             }
 
+            // use older Win32 API to set the awareness to SystemDpiAware
+            return NativeMethods.SetProcessDPIAware() == NativeMethods.SOk;
+
             // return true if per monitor was already enabled
-            return awareness == ProcessDpiAwareness.PerMonitorDpiAware;
         }
     }
 }

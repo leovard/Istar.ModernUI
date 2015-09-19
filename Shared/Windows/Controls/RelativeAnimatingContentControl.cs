@@ -1,23 +1,9 @@
-﻿/* 
-    Copyright (c) 2011 Microsoft Corporation.  All rights reserved.
-    Use of this sample source code is subject to the terms of the Microsoft license 
-    agreement under which you licensed this sample source code and is provided AS-IS.
-    If you did not accept the terms of the license agreement, you are not authorized 
-    to use this sample source code.  For the terms of the license, please see the 
-    license agreement between you and Microsoft.
-  
-    To see all Code Samples for Windows Phone, visit http://go.microsoft.com/fwlink/?LinkID=219604 
-  
-*/
-
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
 using System.Windows.Media.Animation;
 
 namespace Istar.ModernUI.Windows.Controls
@@ -87,56 +73,48 @@ namespace Istar.ModernUI.Windows.Controls
                 // the visual state groups of the control must be explored. 
                 // By definition they must be at the implementation root of the
                 // control.
-                if (_specialAnimations == null) {
+                if (_specialAnimations == null)
+                {
                     _specialAnimations = new List<AnimationValueAdapter>();
 
-                    foreach (VisualStateGroup group in VisualStateManager.GetVisualStateGroups(this)) {
-                        if (group == null) {
-                            continue;
-                        }
-                        foreach (VisualState state in group.States) {
-                            if (state != null) {
-                                Storyboard sb = state.Storyboard;
+                    var visualStateGroups = VisualStateManager.GetVisualStateGroups(this);
+                    if (visualStateGroups != null)
+                        foreach (VisualStateGroup group in visualStateGroups) {
+                            if (@group == null) {
+                                continue;
+                            }
+                            foreach (VisualState state in @group.States) {
+                                var sb = state?.Storyboard;
 
-                                if (sb != null) {
-                                    // Examine all children of the storyboards,
-                                    // looking for either type of double
-                                    // animation.
-                                    foreach (Timeline timeline in sb.Children) {
-                                        DoubleAnimation da = timeline as DoubleAnimation;
-                                        DoubleAnimationUsingKeyFrames dakeys = timeline as DoubleAnimationUsingKeyFrames;
-                                        if (da != null) {
-                                            ProcessDoubleAnimation(da);
-                                        }
-                                        else if (dakeys != null) {
-                                            ProcessDoubleAnimationWithKeys(dakeys);
-                                        }
+                                if (sb == null) continue;
+                                // Examine all children of the storyboards,
+                                // looking for either type of double
+                                // animation.
+                                foreach (var timeline in sb.Children) {
+                                    var da = timeline as DoubleAnimation;
+                                    var dakeys = timeline as DoubleAnimationUsingKeyFrames;
+                                    if (da != null) {
+                                        ProcessDoubleAnimation(da);
+                                    }
+                                    else if (dakeys != null) {
+                                        ProcessDoubleAnimationWithKeys(dakeys);
                                     }
                                 }
                             }
                         }
-                    }
                 }
 
                 // Update special animation values relative to the current size.
                 UpdateKnownAnimations();
 
                 // HACK: force storyboard to use new values
-                foreach (VisualStateGroup group in VisualStateManager.GetVisualStateGroups(this)) {
-                    if (group == null) {
-                        continue;
-                    }
-                    foreach (VisualState state in group.States) {
-                        if (state != null) {
-                            Storyboard sb = state.Storyboard;
-
-                            if (sb != null) {
-                                // need to kick the storyboard, otherwise new values are not taken into account.
-                                // it's sad, really don't want to start storyboards in vsm, but I see no other option
-                                sb.Begin(this);     
-                            }
-                        }
-                    }
+                var stateGroups = VisualStateManager.GetVisualStateGroups(this);
+                if (stateGroups == null) return;
+                foreach (var sb in from VisualStateGroup @group in stateGroups where @group != null from sb in (from VisualState state in @group.States select state?.Storyboard) select sb)
+                {
+                    // need to kick the storyboard, otherwise new values are not taken into account.
+                    // it's sad, really don't want to start storyboards in vsm, but I see no other option
+                    sb?.Begin(this);
                 }
             }
         }
@@ -147,7 +125,7 @@ namespace Istar.ModernUI.Windows.Controls
         /// </summary>
         private void UpdateKnownAnimations()
         {
-            foreach (AnimationValueAdapter adapter in _specialAnimations) {
+            foreach (var adapter in _specialAnimations) {
                 adapter.UpdateWithNewDimension(_knownWidth, _knownHeight);
             }
         }
@@ -176,18 +154,18 @@ namespace Istar.ModernUI.Windows.Controls
         {
             // Look for a special value in the To property.
             if (da.To.HasValue) {
-                var d = DoubleAnimationToAdapter.GetDimensionFromIdentifyingValue(da.To.Value);
-                if (d.HasValue) {
-                    _specialAnimations.Add(new DoubleAnimationToAdapter(d.Value, da));
+                var dt = DoubleAnimationToAdapter.GetDimensionFromIdentifyingValue(da.To.Value);
+                if (dt.HasValue) {
+                    _specialAnimations.Add(new DoubleAnimationToAdapter(dt.Value, da));
                 }
             }
 
             // Look for a special value in the From property.
-            if (da.From.HasValue) {
-                var d = DoubleAnimationFromAdapter.GetDimensionFromIdentifyingValue(da.To.Value);
-                if (d.HasValue) {
-                    _specialAnimations.Add(new DoubleAnimationFromAdapter(d.Value, da));
-                }
+            if (!da.From.HasValue) return;
+            if (da.To == null) return;
+            var d = DoubleAnimationFromAdapter.GetDimensionFromIdentifyingValue(da.To.Value);
+            if (d.HasValue) {
+                _specialAnimations.Add(new DoubleAnimationFromAdapter(d.Value, da));
             }
         }
 
@@ -216,15 +194,10 @@ namespace Istar.ModernUI.Windows.Controls
         private abstract class AnimationValueAdapter
         {
             /// <summary>
-            /// Gets or sets the original double value.
-            /// </summary>
-            protected double OriginalValue { get; set; }
-
-            /// <summary>
             /// Initializes a new instance of the AnimationValueAdapter type.
             /// </summary>
             /// <param name="dimension">The dimension of interest for updates.</param>
-            public AnimationValueAdapter(DoubleAnimationDimension dimension)
+            protected AnimationValueAdapter(DoubleAnimationDimension dimension)
             {
                 Dimension = dimension;
             }
@@ -232,7 +205,7 @@ namespace Istar.ModernUI.Windows.Controls
             /// <summary>
             /// Gets the dimension of interest for the control.
             /// </summary>
-            public DoubleAnimationDimension Dimension { get; private set; }
+            protected DoubleAnimationDimension Dimension { get; }
 
             /// <summary>
             /// Updates the original instance based on new dimension information
@@ -249,7 +222,7 @@ namespace Istar.ModernUI.Windows.Controls
             /// <summary>
             /// Stores the animation instance.
             /// </summary>
-            protected T Instance { get; set; }
+            protected T Instance { get; }
 
             /// <summary>
             /// Gets the value of the underlying property of interest.
@@ -267,14 +240,14 @@ namespace Istar.ModernUI.Windows.Controls
             /// Gets the initial value (minus the identifying value portion) that the
             /// designer stored within the visual state animation property.
             /// </summary>
-            protected double InitialValue { get; private set; }
+            private double InitialValue { get; }
 
             /// <summary>
             /// The ratio based on the original identifying value, used for computing
             /// the updated animation property of interest when the size of the
             /// control changes.
             /// </summary>
-            private double _ratio;
+            private readonly double _ratio;
 
             /// <summary>
             /// Initializes a new instance of the GeneralAnimationValueAdapter
@@ -282,7 +255,7 @@ namespace Istar.ModernUI.Windows.Controls
             /// </summary>
             /// <param name="d">The dimension of interest.</param>
             /// <param name="instance">The animation type instance.</param>
-            public GeneralAnimationValueAdapter(DoubleAnimationDimension d, T instance)
+            protected GeneralAnimationValueAdapter(DoubleAnimationDimension d, T instance)
                 : base(d)
             {
                 Instance = instance;
@@ -297,7 +270,7 @@ namespace Istar.ModernUI.Windows.Controls
             /// <param name="number">The initial number.</param>
             /// <returns>Returns a double with an adjustment for the identifying
             /// value portion of the number.</returns>
-            public double StripIdentifyingValueOff(double number)
+            private double StripIdentifyingValueOff(double number)
             {
                 return Dimension == DoubleAnimationDimension.Width ? number - .1 : number - .2;
             }
@@ -311,8 +284,8 @@ namespace Istar.ModernUI.Windows.Controls
             /// contained an identifying value; otherwise, returns null.</returns>
             public static DoubleAnimationDimension? GetDimensionFromIdentifyingValue(double number)
             {
-                double floor = Math.Floor(number);
-                double remainder = number - floor;
+                var floor = Math.Floor(number);
+                var remainder = number - floor;
 
                 if (remainder >= .1 - SimpleDoubleComparisonEpsilon && remainder <= .1 + SimpleDoubleComparisonEpsilon) {
                     return DoubleAnimationDimension.Width;
@@ -331,7 +304,7 @@ namespace Istar.ModernUI.Windows.Controls
             /// <param name="height">The height of the control.</param>
             public override void UpdateWithNewDimension(double width, double height)
             {
-                double size = Dimension == DoubleAnimationDimension.Width ? width : height;
+                var size = Dimension == DoubleAnimationDimension.Width ? width : height;
                 UpdateValue(size);
             }
 
@@ -357,7 +330,8 @@ namespace Istar.ModernUI.Windows.Controls
             /// <returns>Returns the value of the property.</returns>
             protected override double GetValue()
             {
-                return (double)Instance.To;
+                Debug.Assert(Instance.To != null, "Instance.To != null");
+                return (double) Instance.To;
             }
 
             /// <summary>
@@ -391,7 +365,8 @@ namespace Istar.ModernUI.Windows.Controls
             /// <returns>Returns the value of the property.</returns>
             protected override double GetValue()
             {
-                return (double)Instance.From;
+                Debug.Assert(Instance.From != null, "Instance.From != null");
+                return (double) Instance.From;
             }
 
             /// <summary>

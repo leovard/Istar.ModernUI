@@ -4,7 +4,7 @@
                     xmlns:shell="http://schemas.microsoft.com/winfx/2006/xaml/presentation/shell">
     
     <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="/Istar.ModernUI;component/Themes/BBCodeBlock.xaml" />
+        <ResourceDictionary Source="/Istar.ModernUI;component/Themes/BbCodeBlock.xaml" />
         <ResourceDictionary Source="/Istar.ModernUI;component/Themes/ModernButton.xaml" />
         <ResourceDictionary Source="/Istar.ModernUI;component/Themes/ModernDialog.xaml" />
         <ResourceDictionary Source="/Istar.ModernUI;component/Themes/ModernFrame.xaml" />

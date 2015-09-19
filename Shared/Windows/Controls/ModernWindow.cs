@@ -1,11 +1,7 @@
 ﻿using Istar.ModernUI.Presentation;
 using Istar.ModernUI.Windows.Navigation;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -53,14 +49,14 @@ namespace Istar.ModernUI.Windows.Controls
         /// </summary>
         public static DependencyProperty LinkNavigatorProperty = DependencyProperty.Register("LinkNavigator", typeof(ILinkNavigator), typeof(ModernWindow), new PropertyMetadata(new DefaultLinkNavigator()));
 
-        private Storyboard backgroundAnimation;
+        private Storyboard _backgroundAnimation;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ModernWindow"/> class.
         /// </summary>
         public ModernWindow()
         {
-            this.DefaultStyleKey = typeof(ModernWindow);
+            DefaultStyleKey = typeof(ModernWindow);
 
             // create empty collections
             SetCurrentValue(MenuLinkGroupsProperty, new LinkGroupCollection());
@@ -73,13 +69,13 @@ namespace Istar.ModernUI.Windows.Controls
             this.CommandBindings.Add(new CommandBinding(Microsoft.Windows.Shell.SystemCommands.MinimizeWindowCommand, OnMinimizeWindow, OnCanMinimizeWindow));
             this.CommandBindings.Add(new CommandBinding(Microsoft.Windows.Shell.SystemCommands.RestoreWindowCommand, OnRestoreWindow, OnCanResizeWindow));
 #else
-            this.CommandBindings.Add(new CommandBinding(SystemCommands.CloseWindowCommand, OnCloseWindow));
-            this.CommandBindings.Add(new CommandBinding(SystemCommands.MaximizeWindowCommand, OnMaximizeWindow, OnCanResizeWindow));
-            this.CommandBindings.Add(new CommandBinding(SystemCommands.MinimizeWindowCommand, OnMinimizeWindow, OnCanMinimizeWindow));
-            this.CommandBindings.Add(new CommandBinding(SystemCommands.RestoreWindowCommand, OnRestoreWindow, OnCanResizeWindow));
+            CommandBindings.Add(new CommandBinding(SystemCommands.CloseWindowCommand, OnCloseWindow));
+            CommandBindings.Add(new CommandBinding(SystemCommands.MaximizeWindowCommand, OnMaximizeWindow, OnCanResizeWindow));
+            CommandBindings.Add(new CommandBinding(SystemCommands.MinimizeWindowCommand, OnMinimizeWindow, OnCanMinimizeWindow));
+            CommandBindings.Add(new CommandBinding(SystemCommands.RestoreWindowCommand, OnRestoreWindow, OnCanResizeWindow));
 #endif
             // associate navigate link command with this instance
-            this.CommandBindings.Add(new CommandBinding(LinkCommands.NavigateLink, OnNavigateLink, OnCanNavigateLink));
+            CommandBindings.Add(new CommandBinding(LinkCommands.NavigateLink, OnNavigateLink, OnCanNavigateLink));
 
             // listen for theme changes
             AppearanceManager.Current.PropertyChanged += OnAppearanceManagerPropertyChanged;
@@ -106,20 +102,17 @@ namespace Istar.ModernUI.Windows.Controls
 
             // retrieve BackgroundAnimation storyboard
             var border = GetTemplateChild("WindowBorder") as Border;
-            if (border != null) {
-                this.backgroundAnimation = border.Resources["BackgroundAnimation"] as Storyboard;
+            if (border == null) return;
+            _backgroundAnimation = border.Resources["BackgroundAnimation"] as Storyboard;
 
-                if (this.backgroundAnimation != null) {
-                    this.backgroundAnimation.Begin();
-                }
-            }
+            _backgroundAnimation?.Begin();
         }
 
         private void OnAppearanceManagerPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             // start background animation if theme has changed
-            if (e.PropertyName == "ThemeSource" && this.backgroundAnimation != null) {
-                this.backgroundAnimation.Begin();
+            if (e.PropertyName == "ThemeSource") {
+                _backgroundAnimation?.Begin();
             }
         }
 
@@ -128,43 +121,43 @@ namespace Istar.ModernUI.Windows.Controls
             // true by default
             e.CanExecute = true;
 
-            if (this.LinkNavigator != null && this.LinkNavigator.Commands != null) {
+            if (LinkNavigator?.Commands != null) {
                 // in case of command uri, check if ICommand.CanExecute is true
                 Uri uri;
                 string parameter;
                 string targetName;
 
                 // TODO: CanNavigate is invoked a lot, which means a lot of parsing. need improvements??
-                if (NavigationHelper.TryParseUriWithParameters(e.Parameter, out uri, out parameter, out targetName)) {
-                    ICommand command;
-                    if (this.LinkNavigator.Commands.TryGetValue(uri, out command)) {
-                        e.CanExecute = command.CanExecute(parameter);
-                    }
+                if (!NavigationHelper.TryParseUriWithParameters(e.Parameter, out uri, out parameter, out targetName))
+                    return;
+                ICommand command;
+                if (LinkNavigator.Commands.TryGetValue(uri, out command)) {
+                    e.CanExecute = command.CanExecute(parameter);
                 }
             }
         }
 
         private void OnNavigateLink(object sender, ExecutedRoutedEventArgs e)
         {
-            if (this.LinkNavigator != null) {
+            if (LinkNavigator != null) {
                  Uri uri;
                 string parameter;
                 string targetName;
 
                 if (NavigationHelper.TryParseUriWithParameters(e.Parameter, out uri, out parameter, out targetName)) {
-                    this.LinkNavigator.Navigate(uri, e.Source as FrameworkElement, parameter);
+                    LinkNavigator.Navigate(uri, e.Source as FrameworkElement, parameter);
                 }
             }
         }
 
         private void OnCanResizeWindow(object sender, CanExecuteRoutedEventArgs e)
         {
-            e.CanExecute = this.ResizeMode == ResizeMode.CanResize || this.ResizeMode == ResizeMode.CanResizeWithGrip;
+            e.CanExecute = ResizeMode == ResizeMode.CanResize || ResizeMode == ResizeMode.CanResizeWithGrip;
         }
 
         private void OnCanMinimizeWindow(object sender, CanExecuteRoutedEventArgs e)
         {
-            e.CanExecute = this.ResizeMode != ResizeMode.NoResize;
+            e.CanExecute = ResizeMode != ResizeMode.NoResize;
         }
 
         private void OnCloseWindow(object target, ExecutedRoutedEventArgs e)
