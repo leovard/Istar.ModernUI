@@ -1,0 +1,11 @@
+﻿<mui:ModernDialog x:Class="IstarWindows.NewWindow"
+                  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                  xmlns:mui="Istar.ModernUI"
+                  ResizeMode="NoResize"
+                  ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                  SizeToContent="WidthAndHeight"
+                  TextOptions.TextFormattingMode="Display"
+                  WindowStartupLocation="CenterScreen">
+    <mui:ModernFrame x:Name="ContentFrame" />
+</mui:ModernDialog>

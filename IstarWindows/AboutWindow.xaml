@@ -1,0 +1,42 @@
+﻿<mui:ModernDialog x:Class="IstarWindows.AboutWindow"
+                  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                  xmlns:mui="Istar.ModernUI"
+                  Title="О программе"
+                  ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                  SizeToContent="WidthAndHeight"
+                  TextOptions.TextFormattingMode="Display"
+                  WindowStartupLocation="CenterScreen">
+    <mui:ModernFrame x:Name="ContentFrame">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.ColumnSpan="2" Orientation="Horizontal">
+                <Image Source="/Assets/cinematon.png" />
+                <StackPanel Width="290" Margin="10,0,0,0">
+                    <mui:BBCodeBlock Margin="0,0,0,10" BBCode="[b]IstarManagement - управление недвижимостью[/b]" />
+                    <mui:BBCodeBlock BBCode="                Настоящее приложение разработано для некоммерческого использования исключительно сотрудиками ООО &quot;Синематон&quot;." xml:space="preserve" />
+                </StackPanel>
+            </StackPanel>
+            <StackPanel Grid.Row="1"
+                        Grid.Column="0"
+                        Grid.ColumnSpan="2"
+                        Margin="0,10,0,0">
+                <mui:BBCodeBlock Margin="0,0,0,3" BBCode="По всем вопросам обращаться:" />
+                <mui:BBCodeBlock Margin="0,0,0,3" BBCode="454010 РОССИЯ г. Челябинск, ул. Гагарина, д. 5" />
+                <mui:BBCodeBlock Margin="0,0,0,3" BBCode="Телефон: +7 351 211 6741" />
+                <mui:BBCodeBlock Margin="0,0,0,3" BBCode="Электронная почта: [b][url=mailto:cinematon@mail.ru?subject=О%20программе%20Istar%20Management&amp;]cinematon@mail.ru[/url][/b]" />
+                <mui:BBCodeBlock BBCode="Веб-сайт компании: [b][url=http://cinematon.ru]www.cinematon.ru[/url][/b]" />
+                <TextBlock Margin="0,0,0,-65"
+                           VerticalAlignment="Center"
+                           Text="Авторские права - Л. С. Варданян." />
+            </StackPanel>
+        </Grid>
+    </mui:ModernFrame>
+</mui:ModernDialog>

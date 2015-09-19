@@ -1,0 +1,11 @@
+﻿<mui:ModernFrame x:Class="IstarWindows.SplashScreen"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:mui="Istar.ModernUI">
+    <Grid>
+        <mui:ModernProgressRing Width="80"
+                                Height="80"
+                                IsActive="True"
+                                Style="{DynamicResource DoubleBounceProgressRingStyle}" />
+    </Grid>
+</mui:ModernFrame>

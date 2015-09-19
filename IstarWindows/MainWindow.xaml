@@ -1,0 +1,78 @@
+﻿<mui:ModernWindow x:Class="IstarWindows.MainWindow"
+                  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                  xmlns:mui="Istar.ModernUI"
+                  xmlns:viewModels="clr-namespace:IstarWindows.ViewModels"
+                  Title="Торгово-офисный центр ИСТАР"
+                  Width="916"
+                  Height="610"
+                  ContentSource="/Views/MainView.xaml"
+                  IsTitleVisible="True"
+                  TitleLinks="{Binding TitleLinks,
+                                       UpdateSourceTrigger=PropertyChanged}"
+                  WindowStartupLocation="CenterScreen"
+                  d:DataContext="{d:DesignInstance viewModels:MainViewModel}"
+                  mc:Ignorable="d">
+    <mui:ModernWindow.MenuLinkGroups>
+        <mui:LinkGroup DisplayName="управление">
+            <mui:LinkGroup.Links>
+                <mui:Link DisplayName="ежедневник" Source="/Views/MainView.xaml" />
+                <mui:Link DisplayName="немного креатива" Source="/Shared/ContentLoaderImages.xaml" />
+                <mui:Link DisplayName="лента twitter" Source="/Shared/TwittsLoader.xaml" />
+            </mui:LinkGroup.Links>
+        </mui:LinkGroup>
+        <mui:LinkGroup DisplayName="объекты">
+            <mui:LinkGroup.Links>
+                <mui:Link DisplayName="Гагарина-5" Source="/Views/Buildings/G5.xaml" />
+                <mui:Link DisplayName="Комсомольский-93" Source="/Views/Buildings/K93.xaml" />
+                <mui:Link DisplayName="Свободы-141" Source="/Views/Buildings/S141.xaml" />
+                <mui:Link DisplayName="Редактор" Source="/Views/Buildings/Editor.xaml" />
+            </mui:LinkGroup.Links>
+        </mui:LinkGroup>
+        <mui:LinkGroup DisplayName="помещения">
+            <mui:LinkGroup.Links>
+                <mui:Link DisplayName="Гагарина-5" Source="/Views/Offices/G5.xaml" />
+                <mui:Link DisplayName="Комсомольский-93" Source="/Views/Offices/K93.xaml" />
+                <mui:Link DisplayName="Свободы-141" Source="/Views/Offices/S141.xaml" />
+            </mui:LinkGroup.Links>
+        </mui:LinkGroup>
+        <mui:LinkGroup DisplayName="организации">
+            <mui:LinkGroup.Links>
+                <mui:Link DisplayName="Гагарина-5" Source="/Views/Customers/G5.xaml" />
+                <mui:Link DisplayName="Комсомольский-93" Source="/Views/Customers/K93.xaml" />
+                <mui:Link DisplayName="Свободы-141" Source="/Views/Customers/S141.xaml" />
+                <mui:Link DisplayName="Редактор" Source="/Views/Customers/Editor.xaml" />
+            </mui:LinkGroup.Links>
+        </mui:LinkGroup>
+        <mui:LinkGroup DisplayName="арендаторы">
+            <mui:LinkGroup.Links>
+                <mui:Link DisplayName="Гагарина-5" Source="/Views/Renters/G5.xaml" />
+                <mui:Link DisplayName="Комсомольский-93" Source="/Views/Renters/K93.xaml" />
+                <mui:Link DisplayName="Свободы-141" Source="/Views/Renters/S141.xaml" />
+                <mui:Link DisplayName="Редактор" Source="/Views/Renters/Editor.xaml" />
+                <mui:Link DisplayName="Архив арендаторов" Source="/Views/Renters/Archive.xaml" />
+            </mui:LinkGroup.Links>
+        </mui:LinkGroup>
+        <mui:LinkGroup DisplayName="счета">
+            <mui:LinkGroup.Links>
+                <mui:Link DisplayName="Гагарина-5" Source="/Views/Orders/G5.xaml" />
+                <mui:Link DisplayName="Комсомольский-93" Source="/Views/Orders/K93.xaml" />
+                <mui:Link DisplayName="Свободы-141" Source="/Views/Orders/S141.xaml" />
+            </mui:LinkGroup.Links>
+        </mui:LinkGroup>
+        <mui:LinkGroup DisplayName="отчеты">
+            <mui:LinkGroup.Links>
+                <mui:Link DisplayName="ОАО &quot;ЧелябЭнергоСбыт&quot;" Source="/Views/Reports/EditorA.xaml" />
+                <mui:Link DisplayName="МУП &quot;ПОВВ&quot;" Source="/Views/Reports/EditorB.xaml" />
+                <mui:Link DisplayName="Редактор служб" Source="/Views/Services/Editor.xaml" />
+            </mui:LinkGroup.Links>
+        </mui:LinkGroup>
+        <mui:LinkGroup>
+            <mui:LinkGroup.Links>
+                <mui:Link DisplayName="Настройки" Source="/Shared/Settings.xaml" />
+            </mui:LinkGroup.Links>
+        </mui:LinkGroup>
+    </mui:ModernWindow.MenuLinkGroups>
+</mui:ModernWindow>
